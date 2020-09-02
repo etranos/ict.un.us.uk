@@ -1,0 +1,623 @@
+---
+title: "USA"
+date: "`r format(Sys.time(), '%d %B, %Y, %H:%M')`"
+output: 
+  html_document:
+    df_print: paged
+    toc: true
+    toc_float: true
+knit: (function(inputFile, encoding) {
+    rmarkdown::render(inputFile, encoding = encoding, output_dir = "../outputs")
+  })
+---
+
+```{r}
+library(rmarkdown)
+library(data.table)
+library(tidyverse)
+library(readxl)
+library(httr)
+library(rprojroot)
+
+library(ggplot2)
+#library(geojsonio)
+library(rgdal)
+library(maptools)
+library(sp)
+library(sf)
+library(rgeos)
+#library(classInt)
+#library(RColorBrewer)
+library(knitr)
+#library(viridis)
+#library(hrbrthemes)
+library(fs)
+library(betareg)
+library(broom)
+
+library(AER)
+library(MASS)
+#library(foreign)
+library(stargazer)
+library(ivpack) 
+library(leaflet)
+library(rvest)
+library(xml2)
+library(tmaptools)
+library(spdep)
+library(spatialreg)
+
+library(acs)
+library(tidycensus)
+
+# This is the project path
+path <- find_rstudio_root_file()
+```
+
+## API 
+```{r}
+censusapi <- paste(path, "/data/usa/raw/nosync/censusapi.R", sep="")
+source(censusapi)
+
+# for acs
+api.key.install(key=censusapi)
+
+# for tidycensus
+census_api_key(censusapi, install = T, overwrite = T)
+```
+
+## Internet subscription
+
+```{r}
+geog <- geo.make(msa = "*")
+
+#bb2018 <- acs.fetch(table.number = "B28002", col.names = "pretty", span = 1, endyear = 2018, geography = geog)
+
+bb2013 <- acs.fetch(table.number = "B28002", col.names = "pretty", span = 1, endyear = 2013, geography = geog)
+
+names(attributes(bb2013))
+
+attr(bb2013, "endyear")
+attr(bb2013, "modified")
+
+str(bb2013)
+
+bb2013.df <- data.frame(cbind(bb2013@geography, 
+                        bb2013@estimate[,1:2]))
+# test
+# bb2013.df$test <- ifelse(row.names(bb2013.df)==bb2013.df$NAME, 1, 0)
+# dim(bb2013.df)
+# sum(bb2013.df$test)
+
+names(bb2013.df)[1] <- "name"
+names(bb2013.df)[2] <- "GEOID"
+names(bb2013.df)[3] <- "total"
+names(bb2013.df)[4] <- "hh.net"
+bb2013.df$hh.net.share <- bb2013.df$hh.net / bb2013.df$total
+```
+
+## Population
+
+```{r}
+geog <- geo.make(msa = "*")
+
+pop2018 <- acs.fetch(table.number = "B01003", col.names = "pretty", span = 1, endyear = 2018, geography = geog)
+
+pop2013 <- acs.fetch(table.number = "B01003", col.names = "pretty", span = 1, endyear = 2013, geography = geog)
+
+names(attributes(pop2013))
+
+attr(pop2018, "endyear")
+attr(pop2013, "acs.colnames")
+
+str(pop2013)
+
+pop2013.df <- data.frame(cbind(pop2013@geography, 
+                        pop2013@estimate))
+# test
+# pop2013.df$test <- ifelse(row.names(pop2013.df)==pop2013.df$NAME, 1, 0)
+# dim(pop2013.df)
+# sum(pop2013.df$test)
+# pop2013.df$test <- NULL
+
+names(pop2013.df)[1] <- "name"
+names(pop2013.df)[2] <- "GEOID"
+names(pop2013.df)[3] <- "pop2013"
+
+pop2018.df <- data.frame(cbind(pop2018@geography, 
+                        pop2018@estimate))
+names(pop2018.df)[1] <- "name"
+names(pop2018.df)[2] <- "GEOID"
+names(pop2018.df)[3] <- "pop2018"
+
+pop <- merge(pop2013.df, pop2018.df, by = "GEOID")
+sapply(pop, function(x) sum(is.na(x)))
+# if all = T, then 5 missing in 2013 and 1 in 2018
+pop$name.y <- NULL
+names(pop)[2] <- "name"
+
+pop <- pop %>% 
+  mutate(r2013 = dense_rank(desc(pop2013))) %>%
+  mutate(r2018 = dense_rank(desc(pop2018))) %>%
+  mutate(r_diff = r2013 - r2018) %>%
+  mutate(r_diff_tr = (r_diff + sum(!is.na(r_diff)))/(2*sum(!is.na(r_diff)))) 
+```
+
+## Unemployment
+
+```{r}
+
+# Table s2301 cannot be found using the acs package, 
+# so it was downloaded manually from https://data.census.gov/
+
+path.un13 <- paste(path, "/data/usa/raw/unemployment/ACSST1Y2013.S2301_data_with_overlays_2020-07-27T081346.csv", sep = "")
+path.un18 <- paste(path, "/data/usa/raw/unemployment/ACSST1Y2018.S2301_data_with_overlays_2020-07-27T081346.csv", sep = "")
+
+un13 <- read_csv(path.un13, skip = 1) %>%
+  dplyr::select(id, `Geographic Area Name`, `Unemployment rate!!Estimate!!Population 16 years and over`) %>%
+  rename(un13 = `Unemployment rate!!Estimate!!Population 16 years and over`) %>%
+  mutate(un13 = as.numeric(un13)) %>%
+  mutate(GEOID = str_sub(id, 10, 14)) %>%
+  dplyr::select(-id)
+    
+# un18 <- read_csv(path.un18, skip = 1) %>%
+#  dplyr::select(id, `Geographic Area Name`, `Estimate!!Unemployment rate!!Population 16 years and over`) %>%
+#  rename(un18 = `Estimate!!Unemployment rate!!Population 16 years and over`) %>%
+#  mutate(un18 = as.numeric(un18))
+```
+
+## White population
+
+```{r}
+
+geog <- geo.make(msa = "*")
+ 
+# acs.lookup(table.number = "B02001", span = 1, endyear = 2013, case.sensitive = F, dataset = "acs")
+
+white2013 <- acs.fetch(variable = "B02001_002", span = 1, endyear = 2013, geography = geog)
+total2013 <- acs.fetch(variable = "B02001_001", span = 1, endyear = 2013, geography = geog)
+
+# NOT to run
+# test <-ifelse(row.names(white2013@estimate)==row.names(total2013@estimate), 1, 0)
+
+white2013 <- white2013@estimate %>%
+  as.tibble() %>%
+  mutate(white2013share = B02001_002 / as.numeric(total2013@estimate[,1])) %>%
+  mutate(names = row.names(white2013@estimate)) %>% 
+  mutate(GEOID = white2013@geography$metropolitanstatisticalareamicropolitanstatisticalarea) %>%
+  dplyr::select(-B02001_002)
+```
+
+## Income
+
+```{r}
+
+geog <- geo.make(msa = "*")
+ 
+# acs.lookup(keyword = "median income", span = 1, endyear = 2013, case.sensitive = F, dataset = "acs")
+
+income2013 <- acs.fetch(variable = "B06011_001", span = 1, endyear = 2013, geography = geog)
+
+income2013 <- income2013@estimate %>%
+  as.tibble() %>%
+  mutate(names = row.names(income2013@estimate)) %>% 
+  mutate(GEOID = income2013@geography$metropolitanstatisticalareamicropolitanstatisticalarea) %>%
+  rename(income2013 = B06011_001) 
+```
+
+## Population density
+
+```{r}
+
+# source: https://catalog.data.gov/dataset/tiger-line-shapefile-2015-nation-u-s-current-metropolitan-statistical-area-micropolitan-statist
+path.cbsa <- paste(path, "/data/usa/raw/tl_2015_us_cbsa/tl_2015_us_cbsa.shp", sep = "")
+mmsa <- readOGR(path.cbsa)  
+density <- mmsa@data %>%
+  dplyr::select(NAME, GEOID, ALAND) %>% 
+  rename(name = NAME) %>%
+  mutate(area_h = as.numeric(as.character(ALAND))/10000) %>%
+  dplyr::select(-ALAND) %>%
+  mutate(GEOID = as.character((GEOID)))
+```
+
+## Commuting and Services 2013
+
+```{r}
+econ <- get_acs(table = "DP03", geography = "metropolitan statistical area/micropolitan statistical area",
+                year = 2013, survey = "acs1") # summary_var = T is not working 
+  
+# econ <- econ %>% 
+#   dplyr::select(-moe) %>%
+#   spread(variable, estimate) %>%  
+#   dplyr::select(GEOID, NAME, DP03_0025, 
+#                 DP03_0002, 
+#                 DP03_0036, DP03_0037, DP03_0038, DP03_0039, DP03_0040, DP03_0041, DP03_0042, DP03_0043, DP03_0044, DP03_0045) %>%
+#   mutate(service2013 = (DP03_0036 +  DP03_0037 +  DP03_0038 +  DP03_0039 +  DP03_0040 +  DP03_0041 +  DP03_0042 +  DP03_0043 +  DP03_0044 +  DP03_0045)/DP03_0002)
+
+econ <- econ %>% 
+  dplyr::select(-moe) %>%
+  spread(variable, estimate) %>%  
+  dplyr::select(GEOID, NAME, DP03_0025, 
+                DP03_0002, 
+                DP03_0036P, DP03_0037P, DP03_0038P, DP03_0039P, DP03_0040P, DP03_0041P, DP03_0042P, DP03_0043P, DP03_0044P, DP03_0045P) %>%
+  mutate(service2013 = (DP03_0036P +  DP03_0037P +  DP03_0038P +  DP03_0039P +  DP03_0040P +  DP03_0041P +  DP03_0042P +  DP03_0043P +  DP03_0044P +  DP03_0045P)) %>%
+  dplyr::select(GEOID, NAME, DP03_0025, service2013) %>%
+  rename(names = NAME, commuting.minutes2013 = DP03_0025)
+
+
+# The below variable labels were copid from data/usa/raw/econ/ACSDP1Y2018.DP03_metadata_2020-07-27T124215.csv
+
+# DP03_0025E	Estimate!!COMMUTING TO WORK!!Workers 16 years and over!!Mean travel time to work (minutes)
+
+# DP03_0002E	Estimate!!EMPLOYMENT STATUS!!Population 16 years and over!!In labor force
+
+# DP03_0036E	Estimate!!INDUSTRY!!Civilian employed population 16 years and over!!Wholesale trade
+# DP03_0037E	Estimate!!INDUSTRY!!Civilian employed population 16 years and over!!Retail trade
+# DP03_0038E	Estimate!!INDUSTRY!!Civilian employed population 16 years and over!!Transportation and warehousing, and utilities
+# DP03_0039E	Estimate!!INDUSTRY!!Civilian employed population 16 years and over!!Information
+# DP03_0040E	Estimate!!INDUSTRY!!Civilian employed population 16 years and over!!Finance and insurance, and real estate and rental and leasing
+# DP03_0041E	Estimate!!INDUSTRY!!Civilian employed population 16 years and over!!Professional, scientific, and management, and administrative and waste management services
+# DP03_0042E	Estimate!!INDUSTRY!!Civilian employed population 16 years and over!!Educational services, and health care and social assistance
+# DP03_0043E	Estimate!!INDUSTRY!!Civilian employed population 16 years and over!!Arts, entertainment, and recreation, and accommodation and food services
+# DP03_0044E	Estimate!!INDUSTRY!!Civilian employed population 16 years and over!!Other services, except public administration
+# DP03_0045E	Estimate!!INDUSTRY!!Civilian employed population 16 years and over!!Public administration
+# DP03_0046E	Estimate!!CLASS OF WORKER!!Civilian employed population 16 years and over
+```
+
+## Commuting 2005 for IV
+
+```{r}
+# 2005 commuting times have been downloaded manually as neither packages access the 2005 ACS
+
+cummuting.path <- paste(path, "/data/usa/raw/econ/ACS_05_EST_DP3_with_ann.csv", sep = "")
+commuting.minutes2005 <- read_csv(cummuting.path, skip = 1)
+
+commuting.minutes2005 <- commuting.minutes2005 %>%
+  #dplyr::select(contains("minutes")) %>% # just to find the relevant columns
+  dplyr::select(Id2, Geography, `Estimate; COMMUTING TO WORK - Workers 16 years and over - Mean travel time to work (minutes)`) %>%
+  rename(commuting.minutes2005 = `Estimate; COMMUTING TO WORK - Workers 16 years and over - Mean travel time to work (minutes)`,
+         names = Geography,
+         GEOID = Id2) %>%
+  mutate(GEOID = as.character(as.numeric(GEOID)))
+
+```
+
+## Bachelors degrees 2005 for IV
+
+```{r}
+# 2005 Bachelors degreestimes have been downloaded manually as neither packages access the 2005 ACS
+
+bachelors.path <- paste(path, "/data/usa/raw/education/ACS_05_EST_S1501_with_ann.csv", sep = "")
+bachelors2005 <- read_csv(bachelors.path, skip = 1)
+
+bachelors2005 <- bachelors2005 %>%
+  #dplyr::select(contains("Bachelor's")) #%>% # just to find the relevant columns
+  dplyr::select(Id2, Geography, `Total; Estimate; Population 25 years and over - Bachelor's degree`) %>%
+  rename(bachelors2005 = `Total; Estimate; Population 25 years and over - Bachelor's degree`,
+         names = Geography, 
+         GEOID = Id2) %>%
+  mutate(GEOID = as.character(as.numeric(GEOID)))
+
+```
+
+## Universities for IV
+
+```{r}
+# source: https://en.wikipedia.org/wiki/List_of_research_universities_in_the_United_States
+
+url <- "https://en.wikipedia.org/wiki/List_of_research_universities_in_the_United_States"
+webpage <- xml2::read_html(url)
+
+uni.table1 <- rvest::html_table(webpage)[[1]] %>% 
+  tibble::as_tibble(.name_repair = "unique")# %>%               # repair the repeated columns
+
+uni.table2 <- rvest::html_table(webpage)[[2]] %>% 
+  tibble::as_tibble(.name_repair = "unique")# %>%               # repair the repeated columns
+
+uni.table <- rbind(uni.table1, uni.table2)
+latlong <-  geocode_OSM(uni.table$Institution) # 266 results
+
+# wrong results based on the leaflet map below
+# these universities are added in the uni.table.nomatch
+wrong.location <- c("The Ohio State University[4]", 
+                    "University of Colorado Denver/Anschutz-Medical Campus",
+                    "University of Nevada, Las Vegas",
+                    "Air Force Institute of Technology Graduate School of Engineering & Management",
+                    "Indiana University � Purdue University Indianapolis",
+                    "Ohio University-Main Campus",
+                    "Ponce Health Sciences University",
+                    "SUNY College of Environmental Science and Forestry",
+                    "Teachers College at Columbia University",
+                    "University of Maryland, Eastern Shore",
+                    "University of Maryland, Baltimore County",
+                    "University of North Carolina Wilmington",
+                    "University of Puerto Rico",
+                    "CUNY City College",
+                    "Johns Hopkins University",
+                    "Texas A&M University–Kingsville")
+
+`%nin%` = Negate(`%in%`)
+
+latlong <- latlong %>%
+  filter(query %nin% wrong.location) %>%
+  dplyr::select(query, lat, lon) %>%
+  rename(Institution = query)
+
+
+uni.table.nomatch <- tibble(
+  Institution = c("The Ohio State University[4]", 
+           "University of Colorado Denver/Anschutz-Medical Campus",
+           "University of Nevada, Las Vegas",
+           "Air Force Institute of Technology Graduate School of Engineering & Management",
+           "Indiana University � Purdue University Indianapolis",
+           "Ohio University-Main Campus",
+           "Ponce Health Sciences University",
+           "SUNY College of Environmental Science and Forestry",
+           "Teachers College at Columbia University",
+           "University of Maryland, Eastern Shore",
+           "University of Maryland, Baltimore County",
+           "University of North Carolina Wilmington",
+           "University of Puerto Rico",
+           "CUNY City College",
+           "Johns Hopkins University",
+           "Texas A&M University–Kingsville"),
+  lat = c(40, 39.743057, 36.10779, 39.783, 39.773996, 39.324, 17.993406, 43.034793, 40.8101, 38.21, 39.2555, 34.2266, 18.403056, 40.8194, 39.328889, 27.5251),
+  lon = c(-83.0125,-104.839326, -115.14376, -84.083, -86.176361, -82.102, -66.619778, -76.135475, -73.96107, -75.685556, -76.711256, -77.878047, -66.050556, -73.95, -76.620278, -97.8825))
+
+uni.table <- rbind(latlong, uni.table.nomatch)
+
+# to correct positive longitudes
+uni.table$lon <- ifelse(uni.table$lon<0, uni.table$lon, uni.table$lon*(-1))
+# sapply(uni.table, function(x) sum(is.na(x)))
+
+# convert uni points to spatial object
+coords_uni <- cbind(uni.table$lon, uni.table$lat)
+uni.cbsa <- SpatialPointsDataFrame(coords_uni, data = data.frame(uni.table))
+proj4string(uni.cbsa) <- CRS("+init=epsg:4269") #define projection
+
+# load sp
+path.cbsa <- paste(path, "/data/usa/raw/tl_2015_us_cbsa/tl_2015_us_cbsa.shp", sep = "")
+mmsa <- readOGR(path.cbsa)  
+proj4string(mmsa) <- CRS("+init=epsg:4269") #define projection
+
+# spatial join to bua_buasd
+uni.sp <- over(uni.cbsa, mmsa[, c("GEOID", "NAME")]) # not a spatial object
+uni.table$GEOID <- uni.sp$GEOID
+uni.table$NAME <- uni.sp$NAME
+
+# Uni map. NOT TO RUN
+# leaflet(mmsa) %>% 
+#   addPolygons() %>% 
+#   addCircles(lng=uni.table$lon, lat=uni.table$lat, popup=uni.table$Name) %>%
+#   addMarkers(lng=uni.table$lon, lat=uni.table$lat, popup=uni.table$Name)
+
+uni.freq <- uni.table %>%
+  group_by(GEOID) %>%
+  summarise(uni.freq = n())
+
+uni.freq <- merge(mmsa@data, uni.freq, by = "GEOID", all.x = T)
+uni.freq$uni.freq <- ifelse(is.na(uni.freq$uni.freq), 0, uni.freq$uni.freq)
+
+uni.freq <- uni.freq %>%
+  dplyr::select(GEOID, NAME, NAMELSAD, uni.freq) %>%
+  mutate(GEOID = as.character(GEOID))
+
+  #rename(GEOGRAPHY_CODE = bua11cd)
+
+path.uni <- paste(path, "/data/usa/raw/uni_freq_us.csv", sep = "")
+write_csv(uni.freq, path.uni)
+```
+
+## Merge objects
+
+```{r}
+data <- list(bb2013.df, pop, un13, white2013, income2013, density, econ, 
+             commuting.minutes2005, bachelors2005, uni.freq) 
+sapply(data, function(x) dim(x))
+sapply(data, function(x) names(x))
+sapply(data, function(x) glimpse(x))
+sapply(data, function(x) x$GEOID = as.character(x$GEOID))
+
+# # rename bua11cd to GEOGRAPHY_CODE
+# names(data[[1]])[1] <- "GEOGRAPHY_CODE"
+# names(data[[1]])[2] <- "download2017"
+# names(data[[1]])[3] <- "upload2017"
+# names(data[[1]])[4] <- "n.tests2017"
+# 
+# names(data[[2]])[1] <- "GEOGRAPHY_CODE"
+# names(data[[2]])[2] <- "download2011"
+# names(data[[2]])[3] <- "upload2011"
+# names(data[[2]])[4] <- "n.tests2011"
+# 
+# names(data[[5]])[1] <- "GEOGRAPHY_CODE"
+
+# merge with reduce
+data <- data %>% 
+  reduce(inner_join, by = "GEOID")
+sapply(data, function(x) sum(is.na(x)))
+
+data <- data %>%
+  dplyr::select(-c(name.y, `Geographic Area Name`, names.x, names.y, names.x.x, names.y.y, NAME, NAMELSAD, name.x)) %>%
+  rename(names.full = names, names = name)
+
+# NOT RUN
+# export file for future reference / backup
+# data.out.path <- paste0(path, "/data/data_inter/data_for_usa_regressions.csv")
+# write.csv(data, data.out.path)
+```
+
+## descriptives
+
+```{r}
+ggplot(data = data, aes(x=hh.net.share, y=r_diff_tr)) + geom_point() + geom_smooth(method = "lm")
+```
+
+## Regressions
+
+```{r}
+# base
+#summary(base <- lm(r_diff_tr ~ I(computer.bb.15/total.bb.15) + log(pop.13) + un.13 + I(white.13/total.race.13) +
+#                     log(income.13) + I(pop.13/area) + service.13 + travel.to.work.m.13, data = df.num)) # OK
+
+summary(base <- lm(r_diff_tr ~ hh.net.share + log(pop2013) + un13 + white2013share +
+                     log(income2013) + I(pop2013/area_h) + service2013 + commuting.minutes2013, data = data))
+
+#summary(base_glm <- glm(r_diff_tr ~ I(computer.bb.15/total.bb.15) + log(pop.13) + un.13 + I(white.13/total.race.13) +
+#                     log(income.13) + I(pop.13/area) + service.13 + travel.to.work.m.13, data = df.num, quasibinomial(link = "logit"))) # 
+
+summary(base_glm <- glm(r_diff_tr ~ hh.net.share + log(pop2013) + un13 + white2013share +
+                     log(income2013) + I(pop2013/area_h) + service2013 + commuting.minutes2013, data = data, quasibinomial(link = "logit")))
+
+#summary(base_betareg <- betareg(r_diff_tr ~ I(computer.bb.15/total.bb.15) + log(pop.13) + un.13 + I(white.13/total.race.13) +
+#                          log(income.13) + I(pop.13/area) + service.13 + travel.to.work.m.13, data = df.num, link = "logit")) # 
+
+summary(base_betareg <- betareg(r_diff_tr ~ hh.net.share + log(pop2013) + un13 + white2013share +
+                     log(income2013) + I(pop2013/area_h) + service2013 + commuting.minutes2013, data = data, link = "logit"))
+
+# summary(base_poisson <- glm((r_diff+18) ~ I(computer.bb.15/total.bb.15) + log(pop.13) + un.13 + I(white.13/total.race.13) +
+#                              log(income.13) + I(pop.13/area) + service.13 + travel.to.work.m.13, data = df.num, family= ("poisson"))) # 
+
+summary(base_poisson <- glm(r_diff_tr ~ hh.net.share + log(pop2013) + un13 + white2013share +
+                     log(income2013) + I(pop2013/area_h) + service2013 + commuting.minutes2013, data = data, family= ("poisson")))
+
+# interactions
+#summary(int_density <- lm(r_diff_tr ~ I(computer.bb.15/total.bb.15)*I(pop.13/area) + log(pop.13) + un.13 + I(white.13/total.race.13) +
+#                     log(income.13) + I(pop.13/area) + service.13 + travel.to.work.m.13, data = df.num)) # OK
+
+summary(int_density <- lm(r_diff_tr ~ hh.net.share*I(pop2013/area_h) + log(pop2013) + un13 + white2013share +
+                     log(income2013) + I(pop2013/area_h) + service2013 + commuting.minutes2013, data = data))
+
+#summary(int_pop <- lm(r_diff_tr ~ I(computer.bb.15/total.bb.15)*log(pop.13) + log(pop.13) + un.13 + I(white.13/total.race.13) +
+#                     log(income.13) + I(pop.13/area) + service.13 + travel.to.work.m.13, data = df.num)) # no sig maybe because of larger cities
+
+summary(int_pop <- lm(r_diff_tr ~ hh.net.share*log(pop2013) + log(pop2013) + un13 + white2013share +
+                     log(income2013) + I(pop2013/area_h) + service2013 + commuting.minutes2013, data = data))
+
+
+# ivreg
+#summary(model_iv1 <- ivreg(r_diff_tr ~ I(computer.bb.15/total.bb.15) + log(pop.13) + un.13 + I(white.13/total.race.13) +
+#                             log(income.13) + I(pop.13/area) + service.13 + travel.to.work.m.13 |
+#                             log(pop.13) + un.13 + I(white.13/total.race.13) +
+#                             log(income.13) + I(pop.13/area) + service.13 + travel.to.work.m.13 +
+#                             + bachelors.05 , data = df.num))
+#summary(model_iv1, vcov = sandwich, diagnostics = TRUE)
+
+summary(model_iv1 <- ivreg(r_diff_tr ~ hh.net.share + log(pop2013) + un13 + white2013share +
+                     log(income2013) + I(pop2013/area_h) + service2013 + commuting.minutes2013 |
+                       log(pop2013) + un13 + white2013share +
+                       log(income2013) + I(pop2013/area_h) + service2013 + commuting.minutes2013 +
+                       bachelors2005, data = data))
+summary(model_iv1, vcov = sandwich, diagnostics = TRUE)
+
+
+#summary(model_iv2 <- ivreg(r_diff_tr ~ I(computer.bb.15/total.bb.15) + log(pop.13) + un.13 + I(white.13/total.race.13) +
+#                     log(income.13) + I(pop.13/area) + service.13 + travel.to.work.m.13 |
+#                       log(pop.13) + un.13 + I(white.13/total.race.13) +
+#                       log(income.13) + I(pop.13/area) + service.13 + travel.to.work.m.13 +
+#                       + bachelors.05 + travel.to.work.m.05 , data = df.num))
+#summary(model_iv2, vcov = sandwich, diagnostics = TRUE)
+
+summary(model_iv2 <- ivreg(r_diff_tr ~ hh.net.share + log(pop2013) + un13 + white2013share +
+                     log(income2013) + I(pop2013/area_h) + service2013 + commuting.minutes2013 |
+                       log(pop2013) + un13 + white2013share +
+                       log(income2013) + I(pop2013/area_h) + service2013 + commuting.minutes2013 +
+                       bachelors2005 + commuting.minutes2005, data = data))
+summary(model_iv2, vcov = sandwich, diagnostics = TRUE)
+```
+
+## Table of Descriptives and Regression tables
+```{r}
+# Table 6
+data.for.decr <- data %>%
+  dplyr::select(r_diff_tr, hh.net.share, pop2013, un13,white2013share, 
+                income2013, area_h, service2013, commuting.minutes2013,
+                bachelors2005, commuting.minutes2005) %>%
+  mutate(density = pop2013/area_h) %>%
+  relocate(density, .before = service2013) %>%
+  dplyr::select(-area_h)
+
+path.out <- paste(path, "/outputs/table6.htm", sep = "")
+
+stargazer(as.data.frame(data.for.decr), out=path.out, type="html", summary = T,
+          covariate.labels=c("normalized difference in ranks, 2013-18", 
+                             "households w. internet, 2013 (%)", 
+                             "population, 2013",  
+                             "% of unemployment, 2013", 
+                             "% of white population, 2013", 
+                             "income, 2013",
+                             "population density, 2013", 
+                             "employment in service, 2011 (%)", 
+                             "commute in minutes, 2013",
+                             "pop. >= 25 w. Bachelor's degree, 2005 (%)",
+                             "commute in minutes, 2005"))
+                             
+# Table 7
+rob.base        <- coeftest(base, function(x) vcovHC(x, type="HC0"))
+rob.int_density <- coeftest(int_density, function(x) vcovHC(x, type="HC0"))
+rob.int_pop <- coeftest(int_pop, function(x) vcovHC(x, type="HC0"))
+rob.base_glm <- coeftest(base_glm, function(x) vcovHC(x, type="HC0"))
+
+path.out <- paste(path, "/outputs/table7.htm", sep = "")
+
+stargazer(base, int_density, int_pop, base_glm, type="html",
+          se = list(rob.base[,"Std. Error"], rob.int_density[,"Std. Error"], rob.int_pop[,"Std. Error"], rob.base_glm[, "Std. Error"]), 
+          dep.var.labels=c("Normalized difference in ranks 2013-18"),
+          covariate.labels=c("households w. internet, 2013 (%)", 
+                             "population, 2013",  
+                             "% of unemployment, 2013", 
+                             "% of white population, 2013", 
+                             "income, 2013 (log)",
+                             "population density, 2013", 
+                             "employment in service, 2011 (%)", 
+                             "commute in minutes, 2013", 
+                             "households w. internet, 2013 (%) x pop. density, 2013", 
+                             "households w. internet, 2013 (%) x population, 2013"), 
+          out=path.out, single.row = FALSE, df = FALSE, 
+          omit.stat = c("rsq", "f"), notes = "Robust Std. Error in parenthesis")
+
+# Table 8
+rob.model_iv1 <- coeftest(model_iv1, function(x) vcovHC(x, type="HC0"))
+rob.model_iv2 <- coeftest(model_iv2, function(x) vcovHC(x, type="HC0"))
+summ.fit1 <- summary(model_iv1, vcov. = function(x) vcovHC(x, type="HC0"), diagnostics=T)
+summ.fit2 <- summary(model_iv2, vcov. = function(x) vcovHC(x, type="HC0"), diagnostics=T)
+
+path.out <- paste(path, "/outputs/table8.htm", sep = "")
+
+stargazer(model_iv1, model_iv2, type = "html", 
+          se = list(rob.model_iv1[,"Std. Error"], rob.model_iv2[,"Std. Error"]), 
+          dep.var.labels=c("Normalized difference in ranks, 2013-18"),
+          covariate.labels=c("households w. internet, 2013 (%)", 
+                             "population, 2013",  
+                             "% of unemployment, 2013", 
+                             "% of white population, 2013", 
+                             "income, 2013 (log)",
+                             "population density, 2013", 
+                             "employment in service, 2011 (%)", 
+                             "commute in minutes, 2013"), 
+          out=path.out, single.row = FALSE, df = FALSE, 
+          omit.stat = c("rsq", "f"), notes = c("Robust Std. Error in parenthesis", 
+                                               "IVs: (1) Bachelors degree per hab. in 2005",
+                                               "IVs: (2) Bachelors degree per hab. in 2005, Commute, minutes, 2005"),
+          add.lines = list(c(rownames(summ.fit1$diagnostics)[1],                    # use rownames as line name. in this case Weak insterumetns
+                             round(summ.fit1$diagnostics[1, "statistic"], 2), 
+                             round(summ.fit2$diagnostics[1, "statistic"], 2)), 
+                           c(rownames(summ.fit1$diagnostics)[2], 
+                             round(summ.fit1$diagnostics[2, "statistic"], 2), 
+                             round(summ.fit2$diagnostics[2, "statistic"], 2)), 
+                           c("P-value", 
+                             round(summ.fit1$diagnostics[2, "p-value"], 2), 
+                             round(summ.fit2$diagnostics[2, "p-value"], 2)), 
+                           c(rownames(summ.fit1$diagnostics)[3], 
+                             round(summ.fit1$diagnostics[3, "statistic"], 2), 
+                             round(summ.fit2$diagnostics[3, "statistic"], 2)),
+                           c("P-value", 
+                             round(summ.fit1$diagnostics[3, "p-value"], 2), 
+                             round(summ.fit2$diagnostics[3, "p-value"], 2))
+          ))
+
+```
+
+```{r}
+path.out <- paste0(path, "/data/data_inter/USA.RData")
+save.image(path.out)
+```

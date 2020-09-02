@@ -1,0 +1,706 @@
+---
+title: "UK"
+date: "`r format(Sys.time(), '%d %B, %Y, %H:%M')`"
+output: 
+  html_document:
+    df_print: paged
+    toc: true
+    toc_float: true
+knit: (function(inputFile, encoding) {
+    rmarkdown::render(inputFile, encoding = encoding, output_dir = "../outputs")
+  })
+---
+
+```{r}
+library(rmarkdown)
+library(data.table)
+library(tidyverse)
+library(readxl)
+library(httr)
+library(rprojroot)
+
+library(ggplot2)
+#library(geojsonio)
+library(rgdal)
+library(maptools)
+library(sp)
+library(sf)
+library(rgeos)
+#library(classInt)
+#library(RColorBrewer)
+library(knitr)
+#library(viridis)
+#library(hrbrthemes)
+library(fs)
+library(betareg)
+library(broom)
+
+library(AER)
+library(MASS)
+#library(foreign)
+library(stargazer)
+library(ivpack) 
+library(leaflet)
+library(rvest)
+library(xml2)
+library(tmaptools)
+library(spdep)
+library(spatialreg)
+library(spatialEco)
+
+# This is the project path
+path <- find_rstudio_root_file()
+```
+
+## Merge bua with buasd
+
+```{r}
+# Get BUA 
+# Some BUA also include sub-division, so the two spatial objects need to be downloaded selerately and merged: 
+
+# (i) directly from the web
+# buasd <- readOGR("https://opendata.arcgis.com/datasets/bc2dbefc1285410e9fdf800745d1280f_0.geojson") #, layer="OGRGeoJSON")
+# bua <- readOGR("https://opendata.arcgis.com/datasets/210f705366044b8c9ca3fa6f4f83fa5d_0.geojson")
+
+# or, (ii) from the geojson saved locally
+path.json <- paste(path, "/data/uk/raw/Built-up_Area_Sub_Divisions_(December_2011)_Boundaries.geojson", sep = "")
+buasd <- readOGR(path.json)#, layer="OGRGeoJSON")
+path.json <- paste(path, "/data/UK/raw/Built-up_Areas_(December_2011)_Boundaries_V2.geojson", sep = "")
+bua <- readOGR(path.json)#, layer="OGRGeoJSON")
+# source: https://geoportal.statistics.gov.uk/
+
+# spatial transformations
+buasd <- spTransform(buasd, CRS("+init=epsg:4326"))
+bua <- spTransform(bua, CRS("+init=epsg:4326"))
+
+dim(bua) # 5830
+dim(buasd) #1826
+
+# drop the BUA with sub-division to only include the sub-divisions (see rbind() below)
+bua <- bua[bua$has_sd=="N",] #5262
+
+names(bua)
+names(buasd)
+
+bua$has_sd <- NULL
+bua$urban_bua <- NULL
+bua$sd_count <- NULL
+buasd$buasd_id <- NULL
+names(buasd)[3] <- "bua11cd"
+names(buasd)[4] <- "bua11nm"
+dim(bua)
+dim(buasd)
+bua$sd_count <- NULL
+buasd$sd_type <- NULL
+
+# merge bua with buasd
+bua_buasd <- rbind(bua, buasd, makeUniqueIDs = TRUE)
+dim(bua_buasd@data)
+
+# factors to characters
+bua_buasd@data$bua11cd <- as.character(bua_buasd@data$bua11cd)
+bua_buasd@data$bua11nm <- as.character(bua_buasd@data$bua11nm)
+```
+
+## Broadband speed from Speedchecker Ltd., 2017 
+
+```{r}
+# load broadband data
+path.data <- paste(path, "/data/uk/raw/broadband.speed/2015-2017/broadbandspeed.csv", sep = "")
+bb2017 <- read_csv(path.data, col_names = T)
+range(bb2017$DateTimeStamp)
+
+bb2017 <- bb2017 %>% 
+  filter(DateTimeStamp > "2017-01-01") %>% 
+  filter(DownloadSpeed > 512 & DownloadSpeed< 362000) %>% # Riddlesden and Singleton 2014 + my interpretation
+  filter(UploadSpeed > 100 & UploadSpeed < 21000) %>% # Riddlesden and Singleton 2014 + my interpretation
+  drop_na()
+  
+# convert points to spatial object
+coords_bb <- cbind(bb2017$Longitude, bb2017$Latitude)
+bb.bua <- SpatialPointsDataFrame(coords_bb, data = data.frame(bb2017))
+proj4string(bb.bua) <- CRS("+init=epsg:4326") #define projection
+
+# spatial join to bua_buasd
+bb.bua.sp <- over(bb.bua, bua_buasd[, "bua11cd"]) # not a spatial object
+bb.bua$bua11cd <- bb.bua.sp$bua11cd
+
+# create dataframe object to analyse (remove lat and lon?)
+bb2017 <- bb.bua@data
+
+# drop NAs
+sapply(bb2017, function(x) sum(is.na(x)))
+bb2017 <- bb2017[!is.na(bb2017$bua11cd),]
+#NA bua11cd, coord outside bua, buasd or the UK = 476381 / 1953654 obs (76% of obs retained)
+
+bb2017 <- bb2017 %>%
+  group_by(bua11cd) %>% # this also include buasd
+  summarize(download = median(DownloadSpeed), upload = median(UploadSpeed), n.tests = n()) 
+```
+
+## Broadband speed from Speedchecker Ltd., 2011
+
+```{r}
+# load broadband data
+path.data <- paste(path, "/data/uk/raw/broadband.speed/2011", sep = "")
+files <- dir_ls(path=path.data, pattern="*.csv") # dir_ls() also inludes the paths so it works for .Rmd
+
+bb2011 <- lapply(files, function(x) read_delim(x, delim=",", col_names = F)) %>% 
+  bind_rows() #
+names(bb2011)[1:6] <- c("DateTimeStamp","DownloadSpeed","UploadSpeed","provider","Latitude", "Longitude") 
+
+bb2011 <- bb2011 %>% 
+  filter(DownloadSpeed > 512 & DownloadSpeed< 362000) %>% # Riddlesden and Singleton 2014 + my interpretation
+  filter(UploadSpeed > 100 & UploadSpeed < 21000) %>% # Riddlesden and Singleton 2014 + my interpretation
+  drop_na()
+  
+# convert points to spatial object
+coords_bb <- cbind(bb2011$Longitude, bb2011$Latitude)
+bb.bua <- SpatialPointsDataFrame(coords_bb, data = data.frame(bb2011))
+proj4string(bb.bua) <- CRS("+init=epsg:4326") #define projection
+
+# spatial join to bua_buasd
+bb.bua.sp <- over(bb.bua, bua_buasd[, "bua11cd"]) # not a spatial object
+bb.bua$bua11cd <- bb.bua.sp$bua11cd
+
+# create dataframe object to analyse (remove lat and lon?)
+bb2011 <- bb.bua@data
+
+# drop NAs
+sapply(bb2011, function(x) sum(is.na(x)))
+bb2011 <- bb2011[!is.na(bb2011$bua11cd),]
+#NA bua11cd, coord outside bua, buasd or the UK = 269310 / 1307293 obs (80% of obs retained)
+
+bb2011 <- bb2011 %>%
+  group_by(bua11cd) %>% # this also include buasd
+  summarize(download = median(DownloadSpeed), upload = median(UploadSpeed), n.tests = n()) 
+```
+
+## Population, population rank and differences; LHS variable
+
+```{r}
+pop <- read_csv("https://www.nomisweb.co.uk/api/v01/dataset/NM_2010_1.data.csv?geography=1119879169...1119882228,1119882230...1119885230,1119885232...1119885236,1119885238...1119885256,1119885263...1119885265,1119885267,1119885257...1119885262,1119885266,1119885268...1119885792&gender=0&c_age=200&measures=20100&signature=NPK-8f824e8ae641543e1e4ae2:0xa7a1e65a29f4c48e3059704c1fe86a40e2c0b670")
+# saved also as a wide .csv in /ict_un_us_uk/data/uk/raw/bua_pop.csv
+
+pop <- pop %>% 
+  dplyr::select(DATE, GEOGRAPHY_CODE, GEOGRAPHY_NAME, OBS_VALUE) %>%
+  spread(DATE, OBS_VALUE) %>% 
+  mutate(r2011 = dense_rank(desc(`2011`))) %>% 
+  mutate(r2018 = dense_rank(desc(`2018`))) %>%
+  mutate(r_diff = r2011 - r2018) %>%
+  mutate(r_diff_tr = (r_diff + sum(!is.na(r_diff)))/(2*sum(!is.na(r_diff)))) %>%
+  rename(pop2011 = `2011`) %>%
+  rename(pop2012 = `2012`) %>%
+  rename(pop2013 = `2013`) %>%
+  rename(pop2014 = `2014`) %>%
+  rename(pop2015 = `2015`) %>%
+  rename(pop2016 = `2016`) %>%
+  rename(pop2017 = `2017`) %>%
+  rename(pop2018 = `2018`)
+# for normalisation N = sum(!is.na(r_diff))
+# Check later if this correct for the regression data
+
+# Scotland is excluded as the methodology for Scottish Settlements and Localities is different:
+# https://www.nrscotland.gov.uk/statistics-and-data/statistics/statistics-by-theme/population/population-estimates/special-area-population-estimates/settlements-and-localities/background-information
+# pop %>% filter(str_detect(GEOGRAPHY_CODE, "S")) 
+```
+
+## IMD NOT USED
+
+```{r}
+# #imd.en.2019 <- read_csv(unzip("https://data.cdrc.ac.uk/system/files/English%20IMD%202019.zip" )
+# temp <- tempfile()
+# download.file("https://data.cdrc.ac.uk/system/files/English%20IMD%202019.zip",temp)
+# imd.en.2019 <- read.table(unz(temp, "English"))
+# unlink(temp)
+
+# England 2010
+#england.imd2010 <- read_csv(url("https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/15240/1871702.csv"))
+# also saved as imd_england2010.csv
+
+# England 2019
+#england.imd2019 <- read_csv("https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/845345/File_7_-_All_IoD2019_Scores__Ranks__Deciles_and_Population_Denominators_3.csv")
+
+# Wales 2011
+#url <- "https://gov.wales/sites/default/files/statistics-and-research/2019-04/wimd-2011-individual-domain-scores-and-overall-index-scores-for-each-lsoa.xls"
+#GET(url, write_disk(tf <- tempfile(fileext = ".xls")))
+#wales.imd2011 <- read_excel(tf, 2L)
+# also saved as wimd-2011-individual-domain-scores-and-overall-index-scores-for-each-lsoa.xls
+
+# Wales 2019
+#url <- "https://gov.wales/sites/default/files/statistics-and-research/2019-12/wimd-2019-index-and-domain-scores-by-small-area_0.ods"
+#GET(url, write_disk(tf <- tempfile(fileext = ".xls")))
+#wales.imd2019 <- read_ods(tf, 2L, skip = 2)
+# also saved as wimd-2019-index-and-domain-scores-by-small-area_0.ods
+
+```
+
+## Jobseeker's Allowance with rates and proportions NOT USED
+
+```{r}
+# jobseeker <- read_csv("https://www.nomisweb.co.uk/api/v01/dataset/NM_1_1.data.csv?geography=1119879169...1119882228,1119882230...1119885230,1119885232...1119885236,1119885238...1119885256,1119885263...1119885265,1119885267,1119885257...1119885262,1119885266,1119885268...1119885792&date=latestMINUS108,latestMINUS96,latestMINUS84,latestMINUS72,latestMINUS60,latestMINUS48,latestMINUS36,latestMINUS24,latestMINUS12&sex=7&item=1&measures=20100&signature=NPK-8f824e8ae641543e1e4ae2:0xbd6481e37da64ded2c7523fd7226460d3db46f0f")
+# # saved as wide .csv in \ict_un_us_uk\data\uk\raw\job_seeker_allowance.csv
+# 
+# jobseeker <- read_json("https://www.nomisweb.co.uk/api/v01/dataset/NM_1_1.jsonstat.json?geography=1119879169...1119882228,1119882230...1119885230,1119885232...1119885236,1119885238...1119885256,1119885263...1119885265,1119885267,1119885257...1119885262,1119885266,1119885268...1119885792&date=latestMINUS108,latestMINUS96,latestMINUS84,latestMINUS72,latestMINUS60,latestMINUS48,latestMINUS36,latestMINUS24,latestMINUS12&sex=7&item=1&measures=20100&signature=NPK-8f824e8ae641543e1e4ae2:0xea3fd585c7b9709c1f247b9a304c1355a9b5e13a")
+# 
+# jobseeker %>% spread_all
+# 
+# jobseeker_ <- jobseeker %>% 
+#   dplyr::select(DATE, GEOGRAPHY_CODE, GEOGRAPHY_NAME, OBS_VALUE) %>%
+#   spread(DATE, OBS_VALUE) #%>% 
+#   mutate(r2011 = dense_rank(desc(`2011`))) 
+  
+
+```
+
+## Population density
+
+```{r}
+pop.dens <- read_csv("https://www.nomisweb.co.uk/api/v01/dataset/NM_143_1.data.csv?date=latest&geography=1119879169...1119882228,1119882230...1119885230,1119885232...1119885236,1119885238...1119885256,1119885263...1119885265,1119885267,1119885257...1119885262,1119885266,1119885268...1119885792&rural_urban=0&cell=0,1&measures=20100&signature=NPK-8f824e8ae641543e1e4ae2:0xbd7005144df55f1693a38d07f3e255171c673600")
+# saved also as pop_dens.csv
+
+pop.dens <- pop.dens %>% 
+  dplyr::select(GEOGRAPHY_CODE, GEOGRAPHY_NAME, CELL_NAME, OBS_VALUE) %>%
+  spread(CELL_NAME, OBS_VALUE) %>% 
+  mutate(pop.dens = `All usual residents` / `Area Hectares`) %>%
+  dplyr::select(GEOGRAPHY_CODE, pop.dens)
+```
+
+## urban / rural classification
+
+```{r}
+# England and Wales 2011 urban/rural classification for OA
+# http://geoportal.statistics.gov.uk/datasets/rural-urban-classification-2011-of-output-areas-in-england-and-wales
+path.data <- paste(path, "/data/uk/raw/RUC11_OA11_EW.zip", sep = "")
+ur.ew <- read_csv(unzip(path.data, "RUC11_OA11_EW.csv"))
+
+# NOT USED
+# Scotland
+# The Scottish Government's Urban Rural Classification 2013/14, 2011 Output Area
+# https://www.isdscotland.org/Products-and-Services/GPD-Support/Geography/Urban-Rural-Classification/
+# classification info: https://www2.gov.scot/Topics/Statistics/About/Methodology/UrbanRuralClassification
+# ur.sc <- read_csv("https://www.isdscotland.org/Products-and-Services/GPD-Support/Geography/Urban-Rural-Classification/_docs/2013_2014_urban_rural/oa2011_urban_rural_2013_2014.csv")
+
+# lookup file for OA-to-BUA/BUASD
+lookup.out.bua <- read_csv("https://opendata.arcgis.com/datasets/edaf7c4b5e6e401d987c30c4de6b63e6_0.csv")
+# saved as Output_Area__2011__to_Built-up_Area_Sub-division_to_Built-up_Area_to_Local_Authority_District_to_Region__December_2011__Lookup_in_England_and_Wales.csv
+dim(lookup.out.bua)
+lookup.out.bua <- lookup.out.bua %>% dplyr::select(OA11CD, BUASD11CD, BUASD11NM, BUA11CD, BUA11NM)
+
+ur.ew <- merge(ur.ew, lookup.out.bua, by = "OA11CD", all.x = T)
+sapply(ur.ew, function(x) sum(is.na(x)))
+
+# create new id which contains BUA or BUASD id
+ur.ew$BUA_SD_CD <- ifelse(is.na(ur.ew$BUASD11CD), ur.ew$BUA11CD, ur.ew$BUASD11CD) #replace BUA sub divisions
+ur.ew$BUA_SD_NM <- ifelse(is.na(ur.ew$BUASD11NM), ur.ew$BUA11NM, ur.ew$BUASD11NM) #replace BUA sub divisions
+# with BUA for those BUA which don't have sub divisions
+# sum(ur.ew$BUASD11NM==ur.ew$BUA11NM) #check
+
+length(unique(ur.ew$BUA_SD_CD)) #6621, 6622 now 
+length(unique(ur.ew$BUA_SD_NM)) #6621, 6622 now
+
+ur.ew <- ur.ew %>% 
+  filter(!is.na(BUA11CD) | !is.na(BUASD11CD) | !is.na(BUA_SD_CD)) %>%
+  mutate(urban = gsub("([A-Za-z]+).*", "\\1", RUC11)) %>% # take the first word from split string
+  dplyr::select(BUA_SD_CD, urban) %>%
+  distinct() # this leads to 6621 unique obs., so every BUA_SD_CD has a unique value for urban
+```
+
+## Ethnicity in 2011
+
+```{r}
+british.pop <- read_csv("https://www.nomisweb.co.uk/api/v01/dataset/NM_574_1.data.csv?date=latest&geography=1119879169...1119882228,1119882230...1119885230,1119885232...1119885236,1119885238...1119885256,1119885263...1119885265,1119885267,1119885257...1119885262,1119885266,1119885268...1119885792&rural_urban=0&cell=0,1&measures=20100&signature=NPK-8f824e8ae641543e1e4ae2:0xadba1f3dfe1e84341e0d33f6d082210022a1418e")
+# saved as british_pop.csv
+
+british.pop <- british.pop %>% 
+  dplyr::select(GEOGRAPHY_CODE, GEOGRAPHY_NAME, CELL_NAME, OBS_VALUE) %>%
+  spread(CELL_NAME, OBS_VALUE) %>% 
+  rename(all.pop = `All categories: Ethnic group`) %>%
+  rename(british.pop = `English/Welsh/Scottish/Northern Irish/British`) %>%
+  mutate(british.pop.share = british.pop / all.pop) %>%
+  dplyr::select(GEOGRAPHY_CODE, british.pop.share)
+```
+
+## Working from home 2011
+
+```{r}
+work.home <- read_csv("https://www.nomisweb.co.uk/api/v01/dataset/NM_153_1.data.csv?date=latest&geography=1119879169...1119882228,1119882230...1119885230,1119885232...1119885236,1119885238...1119885256,1119885263...1119885265,1119885267,1119885257...1119885262,1119885266,1119885268...1119885792&rural_urban=0&cell=0,9&measures=20100&signature=NPK-8f824e8ae641543e1e4ae2:0xfa76d191fd681a934f45a8a0f35bad74f3fe0877")
+# save as work_home.csv
+
+work.home <- work.home %>% 
+  dplyr::select(GEOGRAPHY_CODE, GEOGRAPHY_NAME, CELL_NAME, OBS_VALUE) %>%
+  spread(CELL_NAME, OBS_VALUE) %>% 
+  rename(working.pop = `All categories: Distance travelled to work`) %>%
+  rename(work.home = `Work mainly at or from home`) %>%
+  mutate(work.home.share = work.home / working.pop) %>%
+  dplyr::select(GEOGRAPHY_CODE, work.home.share)
+```
+
+## Services 2011
+
+```{r}
+services <- read_csv("https://www.nomisweb.co.uk/api/v01/dataset/NM_1020_1.data.csv?date=latest&geography=1119879169...1119882228,1119882230...1119885230,1119885232...1119885236,1119885238...1119885256,1119885263...1119885265,1119885267,1119885257...1119885262,1119885266,1119885268...1119885792&c_indgpuk11=0...8&c_sex=0&measures=20100&signature=NPK-8f824e8ae641543e1e4ae2:0xe16647b1bfd6ad3e2bbea89fa2de3e97bbbab3a9")
+# saved as industries.csv
+
+services <- services %>%
+  dplyr::select(GEOGRAPHY_CODE, GEOGRAPHY_NAME, C_INDGPUK11_NAME, OBS_VALUE) %>% # C_INDGPUK11: this is the industry code
+  spread(C_INDGPUK11_NAME, OBS_VALUE) %>% 
+  mutate(services.share = (`G, I Distribution, hotels and restaurants` +
+                             `H, J Transport and communication` +
+                             `K, L, M, N Financial, Real Estate, Professional and Administrative activities` +
+                             `O, P, Q Public administration, education and health` +
+                             `R, S, T, U Other`) / `All categories: Industry`)  %>%
+  dplyr::select(GEOGRAPHY_CODE, services.share)
+```
+
+## Unemployment 2011
+
+```{r}
+unemployment <- read_csv("https://www.nomisweb.co.uk/api/v01/dataset/NM_1046_1.data.csv?date=latest&geography=1119879169...1119882228,1119882230...1119885230,1119885232...1119885236,1119885238...1119885256,1119885263...1119885265,1119885267,1119885257...1119885262,1119885266,1119885268...1119885792&c_sex=0&c_age=0&c_ecopuk11=0,1,9&measures=20100&signature=NPK-8f824e8ae641543e1e4ae2:0x9e220902be948949eb24ef622423687fba63356a")
+
+unemployment <- unemployment %>%
+  dplyr::select(GEOGRAPHY_CODE, GEOGRAPHY_NAME, C_ECOPUK11_NAME, OBS_VALUE) %>% 
+  spread(C_ECOPUK11_NAME, OBS_VALUE) %>% 
+  mutate(unemployment.share = (`Economically active: Unemployed (including full-time students)` / 
+                                 `Economically active: Total`)) %>%
+  dplyr::select(GEOGRAPHY_CODE, unemployment.share)
+```
+
+## Universities
+
+```{r}
+# source: https://www.hesa.ac.uk/support/providers, keep HEI
+
+url <- "https://www.hesa.ac.uk/support/providers"
+webpage <- xml2::read_html(url)
+
+uni.table <- rvest::html_table(webpage)[[1]] %>% 
+  tibble::as_tibble(.name_repair = "unique") %>%               # repair the repeated columns
+  filter(Region!= "Scotland" & Region!="Northern Ireland") %>% # drop Scotland and N. Ireland
+  filter(`Provider type` == "HEI")
+
+latlong <-  geocode_OSM(uni.table$Name) # 131 results
+
+# wrong results based on the leaflet map below
+# these universities are added in the uni.table.nomatch
+wrong.location <- c("University of Plymouth", 
+                    "The University of Southampton",
+                    "The Open University",
+                    "The University of Portsmouth",
+                    "Goldsmiths College")
+
+`%nin%` = Negate(`%in%`)
+
+latlong <- latlong %>%
+  filter(query %nin% wrong.location)
+
+uni.table.nomatch <- tibble(
+  Name = c("Conservatoire for Dance and Drama",
+           "Hartpury University",
+           "Imperial College of Science, Technology and Medicine",
+           "Rose Bruford College of Theatre and Performance",
+           "Royal Holloway and Bedford New College",
+           "St George's, University of London",
+           "The University of Huddersfield",
+           "The University of Wales (central functions)",
+           "University of London (Institutes and activities)",
+           "University of Northumbria at Newcastle",
+           "University of St Mark and St John",
+           "University of the Arts, London",
+           "University of Plymouth", 
+           "The University of Southampton",
+           "The Open University",
+           "The University of Portsmouth",
+           "Goldsmiths College"),
+  postcode = c("WC1H 9JJ",
+               "GL19 3BE",
+               "SW7 2BU",
+               "DA15 9DF",
+               "TW20 0EX",
+               "SW17 0RE",
+               "HD1 3DH",
+               "CF10 3NS",
+               "WC1E 7HU",
+               "NE1 8QH",
+               "PL6 8BH",
+               "WC1V 7EY",
+               "PL4 8AA",
+               "SO17 1BJ",
+               "MK7 6BJ",
+               "PO1 2UP",
+               "SE14 6NW"))
+
+latlong.nomatch <-  geocode_OSM(uni.table.nomatch$postcode) # 16 results
+latlong.nomatch$query <- uni.table.nomatch$Name
+
+uni.table <- rbind(latlong, latlong.nomatch)
+uni.table <- uni.table %>%
+  dplyr::select(query, lat, lon) %>%
+  rename(university = query)
+
+# convert uni points to spatial object
+coords_uni <- cbind(uni.table$lon, uni.table$lat)
+uni.bua <- SpatialPointsDataFrame(coords_uni, data = data.frame(uni.table))
+proj4string(uni.bua) <- CRS("+init=epsg:4326") #define projection
+
+# spatial join to bua_buasd
+uni.sp <- over(uni.bua, bua_buasd[, "bua11cd"]) # not a spatial object
+uni.table$bua11cd <- uni.sp$bua11cd
+
+# Uni map. NOT TO RUN
+# leaflet(bua_buasd) %>% 
+#   addPolygons() %>% 
+#   addCircles(lng=uni.table$lon, lat=uni.table$lat, popup=uni.table$university) %>%
+#   addMarkers(lng=uni.table$lon, lat=uni.table$lat, popup=uni.table$university)
+
+uni.freq <- uni.table %>%
+  group_by(bua11cd) %>%
+  summarise(uni.freq = n())
+
+uni.freq <- merge(bua_buasd@data, uni.freq, by = "bua11cd", all.x = T)
+uni.freq$uni.freq <- ifelse(is.na(uni.freq$uni.freq), 0, uni.freq$uni.freq)
+
+uni.freq <- uni.freq %>%
+  dplyr::select(bua11cd, uni.freq) %>%
+  rename(GEOGRAPHY_CODE = bua11cd)
+
+path.uni <- paste(path, "/data/uk/raw/uni_freq.csv", sep = "")
+write_csv(uni.freq, path.uni)
+```
+
+## Merge objects
+
+```{r}
+data <- list(bb2017, bb2011, pop, pop.dens, ur.ew, british.pop, work.home,
+services, unemployment, uni.freq)
+sapply(data, function(x) dim(x))
+sapply(data, function(x) names(x))
+
+# rename bua11cd to GEOGRAPHY_CODE
+names(data[[1]])[1] <- "GEOGRAPHY_CODE"
+names(data[[1]])[2] <- "download2017"
+names(data[[1]])[3] <- "upload2017"
+names(data[[1]])[4] <- "n.tests2017"
+
+names(data[[2]])[1] <- "GEOGRAPHY_CODE"
+names(data[[2]])[2] <- "download2011"
+names(data[[2]])[3] <- "upload2011"
+names(data[[2]])[4] <- "n.tests2011"
+
+names(data[[5]])[1] <- "GEOGRAPHY_CODE"
+
+# merge with reduce
+data <- data %>% 
+  reduce(inner_join, by = "GEOGRAPHY_CODE")
+sapply(data, function(x) sum(is.na(x)))
+
+# NOT RUN
+# export file for future reference / backup
+# data.out.path <- paste0(path, "/data/data_inter/data_for_uk_regressions.csv")
+# write.csv(data, data.out.path)
+```
+
+## descriptives
+
+```{r}
+ggplot(data = data, aes(x=download2011, y=r_diff_tr)) + geom_point() + geom_smooth(method = "lm")
+ggplot(data = data, aes(x=download2017, y=r_diff_tr)) + geom_point() + geom_smooth(method = "lm")
+
+# ggplot(data[(data$n.tests2017>50 & data$download2017<60000),], aes(x=download2017, y=r_diff_tr)) + geom_point() + geom_smooth(method = "lm")
+# ggplot(data[(data$n.tests2011>50),], aes(x=download2011, y=r_diff_tr)) + geom_point() + geom_smooth(method = "lm")
+
+f.n.tests2011 <- data %>%
+  dplyr::select(n.tests2011) %>%
+  group_by(ints = cut_width(n.tests2011, width = 20, boundary = 0)) %>%
+  summarise(n = n())
+head(f.n.tests2011)
+```
+
+## Regressions
+
+F/or all the regressions, we include the aerial units with more than 20 tests in 2011.
+This leads to a decrease in the number of observations include in the regressions from 6096 to 6096 - 2561 = 3535
+
+```{r}
+
+base <- lm(r_diff_tr ~ log(download2011) + log(pop2011) + I(n.tests2011/pop2011) + unemployment.share + 
+                     british.pop.share +  pop.dens + work.home.share + services.share, data = data, subset = n.tests2011>20)
+#nobs(base)
+
+# for robust with library(jtools)
+# summ(base, robust = "HC1")
+
+# upload is not a significant predictor
+
+base_glm <- glm(r_diff_tr ~ log(download2011) + log(pop2011) + I(n.tests2011/pop2011) + unemployment.share +
+                          british.pop.share +  pop.dens + work.home.share + services.share, data = data, subset = n.tests2011>20)
+#nobs(base_glm)
+
+#base_betareg <- betareg(r_diff_tr ~ log(download2011) + log(pop2011) + log(pop2018) + I(n.tests2011/pop2011) + unemployment.share +
+#                          british.pop.share +  pop.dens + work.home.share + services.share, data = data, 
+#                          link = "logit", subset = n.tests2011>20)
+#nobs(base_betareg)
+
+# not converging, try quasipoisson
+#base_poisson <- glm(r_diff_tr ~ log(download2011) + log(pop2011) + I(n.tests2011/pop2011) + unemployment.share +
+#                          british.pop.share +  pop.dens + work.home.share + services.share, data = data, subset = n.tests2011>20, 
+#                          family = "poisson")
+#nobs(base_poisson)
+
+# interactions
+int_density <- lm(r_diff_tr ~ log(download2011)*pop.dens + log(pop2011) + I(n.tests2011/pop2011) + unemployment.share + 
+                     british.pop.share +  pop.dens + work.home.share + services.share, data = data, subset = n.tests2011>20)
+#nobs(int_density)
+
+int_pop <- lm(r_diff_tr ~ log(download2011)*log(pop2011) + log(pop2011) + I(n.tests2011/pop2011) + unemployment.share + 
+                     british.pop.share +  pop.dens + work.home.share + services.share, data = data, subset = n.tests2011>20)
+#nobs(int_pop)
+
+# 2 SLS with IV
+model_iv1 <- ivreg(r_diff_tr ~ log(download2011) + log(pop2011) + I(n.tests2011/pop2011) + unemployment.share + 
+                     british.pop.share +  pop.dens + work.home.share + services.share 
+                   | log(pop2011) + I(n.tests2011/pop2011) + unemployment.share + 
+                     british.pop.share +  pop.dens + work.home.share + services.share + uni.freq
+                     , data = data, subset = n.tests2011>30)
+#summary(model_iv1, vcov = sandwich, diagnostics = TRUE)
+#nobs(base)
+
+model_iv2 <- ivreg(r_diff_tr ~ log(download2011) + log(pop2011) + I(n.tests2011/pop2011) + unemployment.share + 
+                     british.pop.share +  pop.dens + work.home.share + services.share 
+                   | log(pop2011) + I(n.tests2011/pop2011) + unemployment.share + 
+                     british.pop.share +  pop.dens + work.home.share + services.share + uni.freq + n.tests2011
+                     , data = data, subset = n.tests2011>30)
+#summary(model_iv2, vcov = sandwich, diagnostics = TRUE) #yes
+```
+
+## Table of Descriptives and Regression tables
+
+```{r}
+# Table 9
+data.for.decr <- data %>%
+  dplyr::select(r_diff_tr, download2011, pop2011, n.tests2011,  
+         unemployment.share, british.pop.share, pop.dens, 
+         work.home.share, services.share, uni.freq) %>%
+  mutate(n.tests2011perhab = n.tests2011/pop2011) %>%
+  dplyr::select(-n.tests2011) %>%
+  dplyr::select(r_diff_tr, download2011, pop2011, n.tests2011perhab,  # re-redring
+         unemployment.share, british.pop.share, pop.dens, 
+         work.home.share, services.share, uni.freq) 
+
+path.out <- paste(path, "/outputs/table9.htm", sep = "")
+
+stargazer(as.data.frame(data.for.decr), out=path.out, type="html", summary = T,
+          covariate.labels=c("normalized difference in ranks, 2011-14", "download speed, 2011", "population, 2011",  
+                             "broadband tests per capita, 2011", "% of unemployment, 2011", "% of British population, 2011", 
+                             "population density, 2011", "% of people working from home, 2011",
+                             "employment in service, 2011 (%)", "Number of universities"))
+
+#Table 10
+#regressions table robust SE
+rob.base        <- coeftest(base, function(x) vcovHC(x, type="HC0"))
+rob.int_density <- coeftest(int_density, function(x) vcovHC(x, type="HC0"))
+rob.int_pop <- coeftest(int_pop, function(x) vcovHC(x, type="HC0"))
+rob.base_glm <- coeftest(base_glm, function(x) vcovHC(x, type="HC0"))
+
+path.out <- paste(path, "/outputs/table10.htm", sep = "")
+
+stargazer(base, int_density, int_pop, base_glm, type="html",
+          se = list(rob.base[,"Std. Error"], rob.int_density[,"Std. Error"], rob.int_pop[,"Std. Error"], rob.base_glm[, "Std. Error"]), 
+          dep.var.labels=c("Normalized difference in ranks, 2011-18"),
+          #dep.var.caption = "Normalized difference in ranks, 2011-18",
+          column.labels = c("OLS", "GLM"),
+          column.separate = c(3,1),
+          covariate.labels=c("download speed, 2011 (log)", "population, 2011 (log)",  
+                             "broadband tests per capita, 2011", "% of unemployment, 2011", "% of British population, 2011", 
+                             "population density, 2011", "% of people working from home, 2011",
+                             "employment in service, 2011 (%)", "download speed, 2011 (log) x pop. density, 2011", 
+                             "download speed, 2011 (log) x population, 2011 (log)"), 
+          out=path.out, single.row = FALSE, df = FALSE, omit.stat = c("rsq", "f"), 
+          notes = "Robust Std. Error parenthesis")
+
+
+# Table 11
+# 2SLS robust SE table
+#model_iv1, model_iv2, 
+rob.model_iv1 <- coeftest(model_iv1, function(x) vcovHC(x, type="HC0"))
+rob.model_iv2 <- coeftest(model_iv2, function(x) vcovHC(x, type="HC0"))
+summ.fit1 <- summary(model_iv1, vcov. = function(x) vcovHC(x, type="HC0"), diagnostics=T)
+summ.fit2 <- summary(model_iv2, vcov. = function(x) vcovHC(x, type="HC0"), diagnostics=T)
+
+path.out <- paste(path, "/outputs/table11.htm", sep = "")
+
+stargazer(model_iv1, model_iv2, type = "html", 
+          se = list(rob.model_iv1[,"Std. Error"], rob.model_iv2[,"Std. Error"]), 
+          dep.var.labels=c("Normalized difference in ranks, 2011-18"),
+          covariate.labels=c("download speed, 2011 (log)", "population, 2011 (log)",  
+                             "broadband tests per capita, 2011", "% of unemployment, 2011", "% of British population, 2011", 
+                             "population density, 2011", "% of people working from home, 2011",
+                             "employment in service, 2011 (%)"),
+          out=path.out, single.row = FALSE, df = FALSE, 
+          omit.stat = c("rsq", "f"), notes = c("Robust Std. Error in parenthesis", "IVs: (1) Number of universities",
+                                               "IVs: (2) Number of universities, Number of broadband tests, 2011"),
+          add.lines = list(c(rownames(summ.fit1$diagnostics)[1],                    # use rownames as line name. in this case Weak insterumetns
+                             round(summ.fit1$diagnostics[1, "statistic"], 2), 
+                             round(summ.fit2$diagnostics[1, "statistic"], 2)), 
+                           c(rownames(summ.fit1$diagnostics)[2], 
+                             round(summ.fit1$diagnostics[2, "statistic"], 2), 
+                             round(summ.fit2$diagnostics[2, "statistic"], 2)), 
+                           c("P-value", 
+                             round(summ.fit1$diagnostics[2, "p-value"], 2), 
+                             round(summ.fit2$diagnostics[2, "p-value"], 2)), 
+                           c(rownames(summ.fit1$diagnostics)[3], 
+                             round(summ.fit1$diagnostics[3, "statistic"], 2), 
+                             round(summ.fit2$diagnostics[3, "statistic"], 2)),
+                           c("P-value", 
+                             round(summ.fit1$diagnostics[3, "p-value"], 2), 
+                             round(summ.fit2$diagnostics[3, "p-value"], 2))
+          ))
+```
+
+## Autocorrelation
+
+The below indicates no Spatial Autocorrelation in r_diff_tr and in the residulas of the base regression.
+
+```{r}
+# auto correlation
+
+# create a copy of the spatial object
+bua_buasd_copy <- bua_buasd
+
+# merge data used in the regressions with the spatial object 
+bua_buasd_copy@data <- data.frame(bua_buasd_copy@data, data[match(bua_buasd_copy@data$bua11cd, data$GEOGRAPHY_CODE),])
+bua_buasd_copy <- sp.na.omit(bua_buasd_copy)
+
+# Moran's I
+nearest_neigh = knearneigh(coordinates(bua_buasd_copy),k=6, RANN=F)
+nearest_neigh = knn2nb(nearest_neigh)
+spweights = nb2listw(nearest_neigh)
+
+# Moran's I plot
+moran.plot(data$r_diff_tr, spweights)
+
+# Moran's I test
+moran.test(data$r_diff_tr, spweights)
+
+# subset bua_buasd based on the obs. included in base
+inc.obs <- augment(base)[1]
+data.inc.obs <-data %>% 
+  slice(as.numeric(inc.obs$.rownames))
+
+# merge data used in the base regression with the spatial object 
+bua_buasd_copy <- bua_buasd
+bua_buasd_copy@data <- data.frame(bua_buasd_copy@data, data[match(bua_buasd_copy@data$bua11cd, data.inc.obs$GEOGRAPHY_CODE),])
+bua_buasd_copy <- sp.na.omit(bua_buasd_copy)
+
+nearest_neigh = knearneigh(coordinates(bua_buasd_copy),k=6, RANN=F)
+nearest_neigh = knn2nb(nearest_neigh)
+spweights = nb2listw(nearest_neigh)
+
+# Autocorrelation in residuals: NO AUTOCORRELATION
+lm.morantest(base, spweights)
+```
+
+```{r}
+path.out <- paste0(path, "/data/data_inter/UK.RData")
+save.image(path.out)
+```

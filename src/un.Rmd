@@ -1,0 +1,595 @@
+---
+title: "UN"
+date: "`r format(Sys.time(), '%d %B, %Y, %H:%M')`"
+output: 
+  html_document:
+    df_print: paged
+    toc: true
+    toc_float: true
+knit: (function(inputFile, encoding) {
+    rmarkdown::render(inputFile, encoding = encoding, output_dir = "../outputs")
+  })
+---
+
+```{r}
+library(rmarkdown)
+library(data.table)
+library(tidyverse)
+library(readxl)
+library(httr)
+library(rprojroot)
+
+library(ggplot2)
+#library(geojsonio)
+library(rgdal)
+library(maptools)
+library(sp)
+library(sf)
+library(rgeos)
+#library(classInt)
+#library(RColorBrewer)
+library(knitr)
+#library(viridis)
+#library(hrbrthemes)
+library(fs)
+library(betareg)
+library(broom)
+
+library(AER)
+library(MASS)
+#library(foreign)
+library(stargazer)
+library(ivpack) 
+library(leaflet)
+library(rvest)
+library(xml2)
+library(tmaptools)
+library(spdep)
+library(spatialreg)
+
+library(acs)
+library(tidycensus)
+library(rio)
+library(wbstats)
+library(WDI)
+library(kableExtra)
+
+# This is the project path
+path <- find_rstudio_root_file()
+```
+
+## Zipf regressions
+
+```{r}
+# get urban pop data
+url <- "https://population.un.org/wup/Download/Files/WUP2018-F22-Cities_Over_300K_Annual.xls"
+GET(url, write_disk(tf <- tempfile(fileext = ".xls")))
+urban.pop.raw <- read_excel(tf, 1L, range = "A17:CP1877", col_names = T)
+# also saved as ./Data/UN/WUP2018-F22-Cities_Over_300K_Annual.xls
+
+# get country codes
+url <- "https://population.un.org/wup/Download/Files/WUP2018-F00-Locations.xlsx"
+# also saved as ./Data/UN/WUP2018-F22-Cities_Over_300K_Annual.xls
+
+codes <- rio::import(url)  # , startRow = 32)
+codes <- codes[27:285,2:5]
+codes <- codes %>%
+  dplyr::select(-`...3`) %>%
+  rename(`Country or area` = `...2`,
+         `Country Code` = `United Nations`,
+         ISO = `...5`) %>%
+  remove_rownames() %>%
+  dplyr::select(-`Country or area`) # no need of this at the end
+
+# names
+names <- urban.pop.raw %>% 
+  dplyr::select(1:5 | starts_with("2")) %>%
+  dplyr::select(-(25:41)) %>%
+  rename_at(vars(-c(Index, 
+                    `Country Code`, 
+                    `Country or area`, 
+                    `City Code`, 
+                    `Urban Agglomeration`)),
+            function(x) paste0("pop", x))
+
+# # rankings OLD
+# ranks <- urban.pop.raw %>% 
+#   dplyr::select(`Country Code` | starts_with("2")) %>%
+#   group_by(`Country Code`) %>%
+#   summarise(across(everything(),dense_rank)) %>%
+#   dplyr::select(-c(1, 21:37)) %>%
+#   rename_at(vars(-`Country Code`),
+#             function(x) paste0("rank", x))
+
+dense_rank_d <- function(x){
+  dense_rank(-x)
+}
+
+# rankings
+ranks <- urban.pop.raw %>% 
+  dplyr::select(`Country Code`, `City Code`, starts_with("2")) %>%
+  group_by(`Country Code`) %>%
+  mutate_at(3:38, dense_rank_d) %>%
+  #mutate(dense_rank(-c(3:38))) %>%
+  dplyr::select(-c(22:38)) %>%
+  rename_at(vars(-`Country Code`, -`City Code`),
+            function(x) paste0("rank", x))
+
+# merge
+#urban.pop <- bind_cols(names, ranks)
+urban.pop <- left_join(names, ranks, by = "City Code") %>%
+  dplyr::select(-`Country Code.y`) %>%
+  rename(`Country Code` = `Country Code.x`)
+  
+#urban.pop$`Country Code...25` <- NULL
+#urban.pop <- rename(urban.pop, `Country Code` = `Country Code...2`)
+urban.pop <- merge(urban.pop, codes, by = "Country Code", all.x = T)
+urban.pop <- urban.pop %>%
+  relocate(ISO, .before = `City Code`) %>%
+  dplyr::select(-Index) %>%
+  group_by(ISO) %>%
+  add_tally %>%
+  rename(n.cities = n) %>%
+  relocate(n.cities, .before = pop2000) %>%
+  filter(n.cities > 5) # keep the countries with x or more urban agglomeration of 300k or above
+
+# Zipf regressions
+zipf <- NULL
+years <- 2000:2018
+countries <- unique(urban.pop$ISO)
+for (c in countries){
+  for (i in years){
+  model.name <- paste(c, i, sep = ".")
+  formula <- paste0("log(rank", i, " - 0.5) ~ log(pop", i, ")") # log transformation and Gabaix and Ibragimov (2011) correction
+  model <- lm(formula, data = urban.pop[urban.pop$ISO==c,])
+  b <- coef(summary(model))[2, 1]
+  se <- coef(summary(model))[2, 2]
+  df <- cbind(b = b, se = se, country = c, year = i)
+  zipf <- rbind(zipf, df)
+  # assign(model.name, model) # assign object (x) to a name (model.name)
+}
+}
+
+# model$coefficients[2]
+# se <- sqrt(diag(vcov(model)))
+# coef(summary(model))[2, 2]
+
+
+zipf <- as_tibble(zipf) %>% 
+  mutate(b = as.numeric(b),
+         se = as.numeric(se),
+         year = as.numeric(year)) %>%
+  dplyr::select(country, year, b, se)
+```
+
+## Data for second stage regressions - search World Bank API
+
+```{r}
+
+# This are just asearches in the world bank database
+
+wb_search(pattern = "broadband")
+wb_search(pattern = "internet")
+wb_search(pattern = "mobile")
+wb_search(pattern = "fixed")
+wb_search(pattern = "total population")
+wb_search(pattern = "population density")
+wb_search(pattern = "GDP per capita")
+wb_search(pattern = "GDP growth")
+wb_search(pattern = "trade")
+wb_search(pattern = "government final consumption expenditure")
+wb_search(pattern = "value added")
+wb_search(pattern = "Mortality rate")
+wb_search(pattern = "Female labor force")
+wb_search(pattern = "Secure internet servers")
+wb_search(pattern = "households with television")
+wb_search(pattern = "telecommunication sector")
+          
+# IT.NET.BBND.P3	    Broadband subscribers (per 1,000 people)
+# IT.NET.USER.P3	    Internet users (per 1,000 people)	
+# IT.CEL.SETS.P3      Mobile phone subscribers (per 1,000 people)	
+# IT.MLT.MAIN.P3	    Telephone mainlines (per 1,000 people)	
+# SP.POP.TOTL         Population, total	
+# EN.POP.DNST	        Population density (people per sq. km of land area)
+# NY.GDP.PCAP.PP.KD	  GDP per capita, PPP (constant 2017 international $)
+# NY.GDP.MKTP.KD.ZG	  GDP growth (annual %)
+# NE.TRD.GNFS.ZS	    Trade (% of GDP)
+# NE.CON.GOVT.ZS	    General government final consumption expenditure (% of GDP)
+# NV.AGR.TOTL.ZS	    Agriculture, forestry, and fishing, value added (% of GDP)
+# HF.DYN.MORT	        Mortality rate, under-5 (per 1,000)	
+# SL.TLF.TOTL.FE.ZS	  Labor force, female (% of total labor force)	
+# IT.NET.SECR.P6	    Secure Internet servers (per 1 million people)
+# IT.TVS.HOUS.ZS	    Households with television (%) **20 YEAR LAG IS NEEDED**
+# SL.EMP.TRAN	        Number of people employed in transportation and telecommunication sector **20 YEAR LAG IS NEEDED**
+
+# test <- wb_data(indicator = "IT.NET.BBND.P3", start_date = 2000, end_date = 2018)
+
+wb_data("IT.NET.BBND.P3") # no, Broadband subscribers (per 1,000 people)
+wb_data("IT.NET.BBND")    # Broadband subscribers
+WDI("IT.NET.BBND.P3", country = "all") # until 2012
+# localy saved in ./Data/UN/API_IT.NET.BBND.P2_DS2_en_csv_v2_1221909.zip
+
+wb_data("IT.NET.USER.P3") # no, Internet users (per 1,000 people)	
+wb_data("IT.NET.USER")    # no, Internet users (per 1,000 people)	
+# http://api.worldbank.org/v2/country/all/indicator/IT.NET.USER.P3?per_page=4000
+WDI("IT.NET.USER.P3", country = "all") # until 2012
+# localy saved in ./Data/UN/API_IT.NET.USER.ZS_DS2_en_csv_v2_1307380.zip
+
+wb_data("IT.CEL.SETS.P3") # no, Mobile phone subscribers (per 1,000 people)	
+wb_data("IT.CEL.SETS")    # Mobile phone subscribers
+WDI("IT.CEL.SETS.P3", country = "all") # until 2012
+# localy saved in ./Data/UN/API_IT.CEL.SETS.P2_DS2_en_csv_v2_1217961.zip
+
+wb_data("IT.MLT.MAIN.P3") # no, Telephone mainlines (per 1,000 people)	
+wb_data("IT.MLT.MAIN")    # Telephone mainlines 
+# localy saved in ./Data/UN/API_IT.MLT.MAIN.P2_DS2_en_csv_v2_1221907.zip
+
+wb_data("SP.POP.TOTL")
+wb_data("EN.POP.DNST")
+wb_data("NY.GDP.PCAP.PP.KD")
+wb_data("NY.GDP.MKTP.KD.ZG")
+wb_data("NE.TRD.GNFS.ZS")
+wb_data("NE.CON.GOVT.ZS")
+wb_data("NV.AGR.TOTL.ZS")
+wb_data("HF.DYN.MORT")
+wb_data("SL.TLF.TOTL.FE.ZS")
+wb_data("IT.NET.SECR.P6") # no, too many missing
+wb_data("IT.TVS.HOUS.ZS") # no, Households with television (%) **20 YEAR LAG IS NEEDED**
+WDI("IT.TVS.HOUS.ZS", country = "all") #no 
+# localy saved in ./Data/UN/
+wb_data("SL.EMP.TRAN")    #	no, Number of people employed in transportation and telecommunication sector **20 YEAR LAG IS NEEDED**
+# localy saved in ./Data/UN/
+WDI("SL.EMP.TRAN", country = "all") #no
+```
+
+## Data for second stage regressions
+
+```{r}
+# Getting the data for the second stage (after Zipf) regressions.
+# This is where the data build starts.
+# The below codes were obtained after the above searches.
+
+rhs1 <- wb_data(c("SP.POP.TOTL",
+                  "EN.POP.DNST",
+                  "NY.GDP.PCAP.PP.KD",
+                  "NY.GDP.MKTP.KD.ZG",
+                  "NE.TRD.GNFS.ZS",
+                  "NE.CON.GOVT.ZS",
+                  "NV.AGR.TOTL.ZS",
+                  #"HF.DYN.MORT", # too many missing data points
+                  #"IT.NET.SECR.P6", # too many missing data points
+                  "SL.TLF.TOTL.FE.ZS"),
+                start_date = 2000,
+                end_date = 2018)
+
+rhs1 <- rhs1 %>% 
+  rename(country_name = country,
+         country = iso3c,
+         year = date,
+         pop.dens = EN.POP.DNST,
+         # mort5 = HF.DYN.MORT,
+         # sec.serv = IT.NET.SECR.P6,  
+         gov.exp = NE.CON.GOVT.ZS,
+         trade = NE.TRD.GNFS.ZS,
+         agri = NV.AGR.TOTL.ZS,
+         gdp.growth = NY.GDP.MKTP.KD.ZG, 
+         gdppc = NY.GDP.PCAP.PP.KD,
+         fem.lab = SL.TLF.TOTL.FE.ZS,
+         pop = SP.POP.TOTL) %>%
+  mutate(non.agri = 100-agri) %>%
+  dplyr::select(-agri)
+  
+# internet users
+net.path <- paste0(path, "/Data/UN/API_IT.NET.USER.ZS_DS2_en_csv_v2_1307380.zip")
+con <- unz(net.path, "API_IT.NET.USER.ZS_DS2_en_csv_v2_1307380.csv")
+net <- read_csv(con, skip = 4) %>%
+  dplyr::select(-(5:44), -(64:65)) %>%
+  rename(country = `Country Code`) %>% 
+  dplyr::select(-c(1,3:4)) %>%
+  gather("year", "net100hab", -c(country)) %>%
+  mutate(year = as.numeric(year))
+
+# broadband users
+bb.path <- paste0(path, "/Data/UN/API_IT.NET.BBND.P2_DS2_en_csv_v2_1221909.zip")
+con <- unz(bb.path, "API_IT.NET.BBND.P2_DS2_en_csv_v2_1221909.csv")
+bb <- read_csv(con, skip = 4) %>%
+  dplyr::select(-(5:44), -(64:65)) %>%
+  rename(country = `Country Code`) %>% 
+  dplyr::select(-c(1,3:4)) %>%
+  gather("year", "bb100hab", -c(country)) %>%
+  mutate(year = as.numeric(year))
+
+# mobile phone users
+mobile.path <- paste0(path, "/Data/UN/API_IT.CEL.SETS.P2_DS2_en_csv_v2_1217961.zip")
+con <- unz(mobile.path, "API_IT.CEL.SETS.P2_DS2_en_csv_v2_1217961.csv")
+mobile <- read_csv(con, skip = 4) %>%
+  dplyr::select(-(5:44), -(64:65)) %>%
+  rename(country = `Country Code`) %>% 
+  dplyr::select(-c(1,3:4)) %>%
+  gather("year", "mobile100hab", -c(country)) %>%
+  mutate(year = as.numeric(year))
+
+# fixed telephony users
+fixed.path <- paste0(path, "/Data/UN/API_IT.MLT.MAIN.P2_DS2_en_csv_v2_1221907.zip")
+con <- unz(fixed.path, "API_IT.MLT.MAIN.P2_DS2_en_csv_v2_1221907.csv")
+fixed <- read_csv(con, skip = 4) %>%
+  dplyr::select(-(5:44), -(64:65)) %>%
+  rename(country = `Country Code`) %>% 
+  dplyr::select(-c(1,3:4)) %>%
+  gather("year", "fixed100hab", -c(country)) %>%
+  mutate(year = as.numeric(year))
+
+# tv 
+# tv <- WDI("IT.TVS.HOUS.ZS", country = "all") %>%
+#   rename(country = iso2c, country_name = country, tv.hous100 = IT.TVS.HOUS.ZS) %>% 
+#   mutate(year = year + 10) # this is for the 10 year lag IV
+
+tv.path <- paste0(path, "/Data/UN/itu_database2.xls")
+tv <- read_excel(tv.path) %>%
+  filter(`Series Name` == "Percentage of households with TV") %>%
+  dplyr::select(-(5:35)) %>% #, -(64:65)
+  rename(country = `Country Code`) %>% 
+  dplyr::select(-c(1,2,4)) %>%
+  gather("year", "tv100hh", -c(country)) %>%
+  mutate(tv100hh = as.numeric(tv100hh),
+         year = as.numeric(year) + 10) %>% # this is for the 10 year lag IV 
+  rename(tv100hh10L = tv100hh)
+
+
+# employment in telecommunications
+tele.emp.path <- paste0(path, "/Data/UN/tele_employment.csv")
+tele.emp <- read_csv(tele.emp.path) %>%
+  dplyr::select(-(5:34)) %>% #, -(64:65)
+  rename(country = `Country Code`) %>% 
+  dplyr::select(-c(1,2,4)) %>%
+  gather("year", "tele.emp", -c(country)) %>%
+  mutate(tele.emp = as.numeric(tele.emp),
+         year = as.numeric(year) + 10) %>% # this is for the 10 year lag IV 
+  rename(tele.emp10L = tele.emp)
+
+# TODO: GAPS
+```
+
+## Merge objects
+
+```{r}
+data <- list(zipf, rhs1, net, bb, mobile, fixed)# tele.emp and tv are not used in the regressions
+sapply(data, function(x) dim(x))
+sapply(data, function(x) names(x))
+sapply(data, function(x) str(x))
+
+# merge with reduce
+data <- data %>% 
+  reduce(inner_join, by = c("country", "year")) %>%
+  relocate(iso2c, .after = country) %>%
+  relocate(country_name, .after = country)
+sapply(data, function(x) sum(is.na(x)))
+
+# NOT RUN
+# export file for future reference / backup
+# data.out.path <- paste0(path, "/data/data_inter/data_for_un_regressions.csv")
+# write.csv(data, data.out.path)
+```
+
+## descriptives
+
+```{r}
+ggplot(data = data, aes(x=bb100hab, y=b)) + geom_point() + geom_smooth(method = "lm")
+```
+
+## regressions
+
+```{r}
+
+# These are just tests
+
+library(plm)
+data.plm <- pdata.frame(data, index=c("country","year"), drop.index=TRUE, row.names=TRUE)
+
+test.lm <- plm(b ~ pop.dens  + gov.exp + trade + non.agri + gdp.growth + gdppc + fem.lab + pop + net100hab + as.factor(year), 
+               data = data, model = "within")
+summary(test.lm)
+
+test.2w <- plm(b ~ fixed100hab + log(pop.dens)  + gov.exp + trade + non.agri + gdp.growth + log(gdppc) +  log(pop), 
+               data = data, model = "within", effect = "twoways", weights = 1/(se^2))
+summary(test.2w)
+
+test.w.ols <- lm(b ~ net100hab + log(pop.dens)  + gov.exp + trade + non.agri + gdp.growth + log(gdppc) +  log(pop)
+                  + as.factor(country) + as.factor(year), 
+               data = data, weights = 1/(se^2))
+summary(test.w.ols)
+
+test.2w.2sls <- ivreg(b ~ fixed100hab + log(pop.dens)  + gov.exp + trade + non.agri + gdp.growth + log(gdppc) +  log(pop) 
+                      + as.factor(year) + as.factor(country) |
+                      log(pop.dens)  + gov.exp + trade + non.agri + gdp.growth + log(gdppc) +  log(pop) 
+                      + as.factor(year) + as.factor(country)  +
+                      fem.lab, 
+               data = data, weights = 1/(se^2))
+summary(test.2w.2sls, vcov = sandwich, diagnostics = TRUE)
+
+test.2w.2sls <- plm(b ~ fixed100hab + log(pop.dens)  + gov.exp + trade + non.agri + gdp.growth + log(gdppc) +  log(pop) 
+                      + as.factor(year) + as.factor(country) |
+                      log(pop.dens)  + gov.exp + trade + non.agri + gdp.growth + log(gdppc) +  log(pop) 
+                      + as.factor(year) + as.factor(country)  +
+                      fem.lab, 
+               data = data, weights = 1/(se^2), model = "fd", effect = "twoways")
+summary(test.2w.2sls, vcov = sandwich, diagnostics = TRUE)
+
+
+# + bb100hab + mobile100hab + fixed100hab 
+# + mort5 + fem.lab +
+
+```
+
+## Table 4
+
+```{r}
+net.model <- lm(b ~ net100hab + log(pop.dens)  + gov.exp + trade + non.agri + gdp.growth + log(gdppc) +  log(pop)
+                  + as.factor(country) + as.factor(year), 
+               data = data, weights = 1/(se^2))
+
+bb.model <- lm(b ~ bb100hab + log(pop.dens)  + gov.exp + trade + non.agri + gdp.growth + log(gdppc) +  log(pop)
+                  + as.factor(country) + as.factor(year), 
+               data = data, weights = 1/(se^2))
+
+fixed.model <- lm(b ~ fixed100hab + log(pop.dens)  + gov.exp + trade + non.agri + gdp.growth + log(gdppc) +  log(pop)
+                  + as.factor(country) + as.factor(year), 
+               data = data, weights = 1/(se^2))
+
+mobile.model <- lm(b ~ mobile100hab + log(pop.dens)  + gov.exp + trade + non.agri + gdp.growth + log(gdppc) +  log(pop)
+                  + as.factor(country) + as.factor(year), 
+               data = data, weights = 1/(se^2))
+
+# Table 4
+net.rse <- coeftest(net.model, function(x) vcovHC(x, type="HC0"))
+bb.rse <- coeftest(bb.model, function(x) vcovHC(x, type="HC0"))
+fixed.rse <- coeftest(fixed.model, function(x) vcovHC(x, type="HC0"))
+mobile.rse <- coeftest(mobile.model, function(x) vcovHC(x, type="HC0"))
+
+path.out <- paste(path, "/outputs/table4.htm", sep = "")
+
+stargazer(net.model, bb.model, fixed.model, mobile.model, type="html",
+          se = list(net.rse[,"Std. Error"], bb.rse[,"Std. Error"], fixed.rse[,"Std. Error"], mobile.rse[, "Std. Error"]), 
+          dep.var.labels=c("Zipf Coefficient 2000-18"),
+          # covariate.labels=c("households w. internet, 2013 (%)", 
+          #                    "population, 2013",  
+          #                    "% of unemployment, 2013", 
+          #                    "% of white population, 2013", 
+          #                    "income, 2013 (log)",
+          #                    "population density, 2013", 
+          #                    "employment in service, 2011 (%)", 
+          #                    "commute in minutes, 2013", 
+          #                    "households w. internet, 2013 (%) x pop. density, 2013", 
+          #                    "households w. internet, 2013 (%) x population, 2013"), 
+          out=path.out, single.row = FALSE, df = FALSE, 
+          omit = c("country", "year"),
+          add.lines = list(c("Country fixed effects", "Yes", "Yes", "Yes", "Yes"),
+                           c("Yearly fixed effects", "Yes", "Yes", "Yes", "Yes")),
+          omit.stat = c("rsq", "f"), notes = "Robust Std. Error in parenthesis, corrected Zipf coefficient following Gabaix and Ibragimov (2011)")
+
+```
+
+## Table 5
+
+```{r}
+net.2sls <- ivreg(b ~ net100hab + log(pop.dens)  + gov.exp + trade + non.agri + gdp.growth + log(gdppc) +  log(pop) 
+                      + as.factor(year) + as.factor(country) |
+                      log(pop.dens)  + gov.exp + trade + non.agri + gdp.growth + log(gdppc) +  log(pop) 
+                      + as.factor(year) + as.factor(country)  +
+                      fem.lab, 
+               data = data, weights = 1/(se^2))
+summary(net.2sls, vcov = sandwich, diagnostics = TRUE)
+
+# net.2sls.2 <- ivreg(b ~ net100hab + log(pop.dens)  + gov.exp + trade + non.agri + gdp.growth + log(gdppc) +  log(pop) 
+#                       + as.factor(year) + as.factor(country) |
+#                       log(pop.dens)  + gov.exp + trade + non.agri + gdp.growth + log(gdppc) +  log(pop) 
+#                       + as.factor(year) + as.factor(country)  +
+#                       fem.lab + tv100hh10L, # 
+#                data = data, weights = 1/(se^2))
+# summary(net.2sls.2, vcov = sandwich, diagnostics = TRUE)
+
+bb.2sls <- ivreg(b ~ bb100hab + log(pop.dens)  + gov.exp + trade + non.agri + gdp.growth + log(gdppc) +  log(pop) 
+                      + as.factor(year) + as.factor(country) |
+                      log(pop.dens)  + gov.exp + trade + non.agri + gdp.growth + log(gdppc) +  log(pop) 
+                      + as.factor(year) + as.factor(country)  +
+                      fem.lab, 
+               data = data, weights = 1/(se^2))
+summary(bb.2sls, vcov = sandwich, diagnostics = TRUE)
+
+fixed.2sls <- ivreg(b ~ fixed100hab + log(pop.dens)  + gov.exp + trade + non.agri + gdp.growth + log(gdppc) +  log(pop) 
+                      + as.factor(year) + as.factor(country) |
+                      log(pop.dens)  + gov.exp + trade + non.agri + gdp.growth + log(gdppc) +  log(pop) 
+                      + as.factor(year) + as.factor(country)  +
+                      fem.lab, 
+               data = data, weights = 1/(se^2))
+summary(fixed.2sls, vcov = sandwich, diagnostics = TRUE)
+
+mobile.2sls <- ivreg(b ~ mobile100hab + log(pop.dens)  + gov.exp + trade + non.agri + gdp.growth + log(gdppc) +  log(pop) 
+                      + as.factor(year) + as.factor(country) |
+                      log(pop.dens)  + gov.exp + trade + non.agri + gdp.growth + log(gdppc) +  log(pop) 
+                      + as.factor(year) + as.factor(country)  +
+                      fem.lab, 
+               data = data, weights = 1/(se^2))
+summary(mobile.2sls, vcov = sandwich, diagnostics = TRUE)
+
+net.2sls.rse <- coeftest(net.2sls, function(x) vcovHC(x, type="HC0"))
+summ.net.2sls <- summary(net.2sls, vcov. = function(x) vcovHC(x, type="HC0"), diagnostics=T)
+
+bb.2sls.rse <- coeftest(bb.2sls, function(x) vcovHC(x, type="HC0"))
+summ.bb.2sls <- summary(bb.2sls, vcov. = function(x) vcovHC(x, type="HC0"), diagnostics=T)
+
+fixed.2sls.rse <- coeftest(fixed.2sls, function(x) vcovHC(x, type="HC0"))
+summ.fixed.2sls <- summary(fixed.2sls, vcov. = function(x) vcovHC(x, type="HC0"), diagnostics=T)
+
+mobile.2sls.rse <- coeftest(mobile.2sls, function(x) vcovHC(x, type="HC0"))
+summ.mobile.2sls <- summary(mobile.2sls, vcov. = function(x) vcovHC(x, type="HC0"), diagnostics=T)
+
+
+path.out <- paste(path, "/outputs/table5.htm", sep = "")
+
+stargazer(net.2sls, bb.2sls, fixed.2sls, mobile.2sls, type = "html", 
+          se = list(net.2sls.rse[,"Std. Error"], bb.2sls.rse[,"Std. Error"],
+                    fixed.2sls.rse[,"Std. Error"], mobile.2sls.rse[,"Std. Error"]), 
+          dep.var.labels=c("Normalized difference in ranks, 2013-18"),
+          # covariate.labels=c("households w. internet, 2013 (%)", 
+          #                    "population, 2013",  
+          #                    "% of unemployment, 2013", 
+          #                    "% of white population, 2013", 
+          #                    "income, 2013 (log)",
+          #                    "population density, 2013", 
+          #                    "employment in service, 2011 (%)", 
+          #                    "commute in minutes, 2013"), 
+          out=path.out, single.row = FALSE, df = FALSE,
+          omit = c("country", "year"),
+          omit.stat = c("rsq", "f"), notes = c("Robust Std. Error in parenthesis", 
+                                               "IV: Female paticipation in labour force"),
+          add.lines = list(c(rownames(summ.net.2sls$diagnostics)[1],                    # use rownames as line name. in this case Weak insterumetns
+                             round(summ.net.2sls$diagnostics[1, "statistic"], 2), 
+                             round(summ.bb.2sls$diagnostics[1, "statistic"], 2),
+                             round(summ.fixed.2sls$diagnostics[1, "statistic"], 2),
+                             round(summ.mobile.2sls$diagnostics[1, "statistic"], 2)), 
+                           c(rownames(summ.net.2sls$diagnostics)[2], 
+                             round(summ.net.2sls$diagnostics[2, "statistic"], 2), 
+                             round(summ.bb.2sls$diagnostics[2, "statistic"], 2),
+                             round(summ.fixed.2sls$diagnostics[2, "statistic"], 2),
+                             round(summ.mobile.2sls$diagnostics[2, "statistic"], 2)), 
+                           c("P-value", 
+                             round(summ.net.2sls$diagnostics[2, "p-value"], 2), 
+                             round(summ.bb.2sls$diagnostics[2, "p-value"], 2),
+                             round(summ.fixed.2sls$diagnostics[2, "p-value"], 2),
+                             round(summ.mobile.2sls$diagnostics[2, "p-value"], 2)), 
+                           c(rownames(summ.net.2sls$diagnostics)[3], 
+                             round(summ.net.2sls$diagnostics[3, "statistic"], 2), 
+                             round(summ.bb.2sls$diagnostics[3, "statistic"], 2),
+                             round(summ.fixed.2sls$diagnostics[3, "statistic"], 2),
+                             round(summ.mobile.2sls$diagnostics[3, "statistic"], 2)),
+                           c("P-value", 
+                             round(summ.net.2sls$diagnostics[3, "p-value"], 2), 
+                             round(summ.bb.2sls$diagnostics[3, "p-value"], 2),
+                             round(summ.fixed.2sls$diagnostics[3, "p-value"], 2),
+                             round(summ.mobile.2sls$diagnostics[3, "p-value"], 2)),
+                           c("Country fixed effects", "Yes", "Yes", "Yes", "Yes"),
+                           c("Yearly fixed effects", "Yes", "Yes", "Yes", "Yes")
+          ))
+
+
+```
+
+## Table 1
+
+```{r}
+zipf.table <- net.model$model %>%
+  dplyr::select(`as.factor(country)`, `as.factor(year)`, b) %>%
+  spread(`as.factor(year)`, b) %>%
+  rename(`Zipf coef.` = `as.factor(country)`)
+
+zipf.table <- zipf.table %>% kable(format = "html", digits = 3)
+
+path.out <- paste(path, "/outputs/table1.htm", sep = "")
+save_kable(zipf.table, path.out)
+```
+
+```{r}
+path.out <- paste0(path, "/data/data_inter/UN.RData")
+save.image(path.out)
+```
