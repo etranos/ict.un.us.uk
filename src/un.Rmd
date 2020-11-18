@@ -54,9 +54,13 @@ library(wbstats)
 library(WDI)
 library(kableExtra)
 
+library(REAT)
+
 # This is the project path
 path <- find_rstudio_root_file()
 ```
+
+Add description
 
 ## Zipf regressions
 
@@ -162,11 +166,46 @@ zipf <- as_tibble(zipf) %>%
   dplyr::select(country, year, b, se)
 ```
 
+## Alternative measures of spatial dispertion
+
+```{r}
+gini <- urban.pop %>% 
+  rename(country = ISO) %>%
+  dplyr::select((contains("pop")) | country) %>%
+  group_by(country) %>% 
+  summarise(across(everything(), list(REAT::gini))) %>%
+  pivot_longer(!country, names_to = "year", values_to = "gini") %>%
+  mutate(year = gsub("pop", "", year)) %>% 
+  mutate(year = str_sub(year, end=-3)) %>%
+  mutate(year = as.numeric(year))
+  
+herf <- urban.pop %>% 
+  rename(country = ISO) %>%
+  dplyr::select((contains("pop")) | country) %>%
+  group_by(country) %>% 
+  summarise(across(everything(), list(REAT::herf))) %>%
+  pivot_longer(!country, names_to = "year", values_to = "herf") %>%
+  mutate(year = gsub("pop", "", year)) %>% 
+  mutate(year = str_sub(year, end=-3)) %>%
+  mutate(year = as.numeric(year))
+
+cv <- urban.pop %>% 
+  rename(country = ISO) %>%
+  dplyr::select((contains("pop")) | country) %>%
+  group_by(country) %>% 
+  summarise(across(everything(), list(EnvStats::cv))) %>% # raster::cv / 100
+  pivot_longer(!country, names_to = "year", values_to = "cv") %>%
+  mutate(year = gsub("pop", "", year)) %>% 
+  mutate(year = str_sub(year, end=-3)) %>%
+  mutate(year = as.numeric(year))
+
+```
+
 ## Data for second stage regressions - search World Bank API
 
 ```{r}
 
-# This are just asearches in the world bank database
+# These are just searches in the world bank database
 
 wb_search(pattern = "broadband")
 wb_search(pattern = "internet")
@@ -347,13 +386,13 @@ tele.emp <- read_csv(tele.emp.path) %>%
          year = as.numeric(year) + 10) %>% # this is for the 10 year lag IV 
   rename(tele.emp10L = tele.emp)
 
-# TODO: GAPS
 ```
 
 ## Merge objects
 
 ```{r}
-data <- list(zipf, rhs1, net, bb, mobile, fixed)# tele.emp and tv are not used in the regressions
+data <- list(zipf, rhs1, net, bb, mobile, fixed,
+             gini, herf, cv)# tele.emp and tv are not used in the regressions
 sapply(data, function(x) dim(x))
 sapply(data, function(x) names(x))
 sapply(data, function(x) str(x))
@@ -539,7 +578,8 @@ stargazer(net.2sls, bb.2sls, fixed.2sls, mobile.2sls, type = "html",
           #                    "population density, 2013", 
           #                    "employment in service, 2011 (%)", 
           #                    "commute in minutes, 2013"), 
-          out=path.out, single.row = FALSE, df = FALSE,
+          out=path.out, 
+          single.row = FALSE, df = FALSE,
           omit = c("country", "year"),
           omit.stat = c("rsq", "f"), notes = c("Robust Std. Error in parenthesis", 
                                                "IV: Female paticipation in labour force"),

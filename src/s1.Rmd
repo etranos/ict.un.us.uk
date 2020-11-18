@@ -1,0 +1,384 @@
+---
+title: "S1 Appendix"
+author: ""
+output: pdf_document
+knit: (function(inputFile, encoding) {
+    rmarkdown::render(inputFile, encoding = encoding, output_dir = "../outputs")
+  })
+---
+
+```{r, echo=FALSE, warning=FALSE, results='hide', message=FALSE}
+
+# This .Rmd create teh S1 Appendix for the estimation of eq. 3
+# using alternative specifications: Gini, Herfindahl-Hirschman
+# and CV. 
+# The output S1.pdf is located in /outputs
+
+library(rmarkdown)
+library(data.table)
+library(tidyverse)
+library(readxl)
+library(httr)
+library(rprojroot)
+
+library(ggplot2)
+#library(geojsonio)
+library(rgdal)
+library(maptools)
+library(sp)
+library(sf)
+library(rgeos)
+#library(classInt)
+#library(RColorBrewer)
+library(knitr)
+#library(viridis)
+#library(hrbrthemes)
+library(fs)
+library(betareg)
+library(broom)
+
+library(AER)
+library(MASS)
+#library(foreign)
+library(stargazer)
+library(ivpack) 
+library(leaflet)
+library(rvest)
+library(xml2)
+library(tmaptools)
+library(spdep)
+library(spatialreg)
+
+library(acs)
+library(tidycensus)
+library(rio)
+library(wbstats)
+library(WDI)
+library(kableExtra)
+
+library(REAT)
+
+# This is the project path
+# path <- find_rstudio_root_file()
+
+load("C:/Users/nw19521/OneDrive - University of Bristol/projects/Ioannides/ict.un.us.uk/data/data_inter/UN.RData")
+```
+
+```{r, echo=FALSE, warning=FALSE, results='hide', message=FALSE}
+
+# Gini
+
+net.gini.2sls <- ivreg(gini ~ net100hab + log(pop.dens)  + gov.exp + trade + non.agri + gdp.growth + log(gdppc) +  log(pop) 
+                      + as.factor(year) + as.factor(country) |
+                      log(pop.dens)  + gov.exp + trade + non.agri + gdp.growth + log(gdppc) +  log(pop) 
+                      + as.factor(year) + as.factor(country)  +
+                      fem.lab, 
+               data = data, weights = 1/(se^2))
+summary(net.gini.2sls, vcov = sandwich, diagnostics = TRUE)
+
+bb.gini.2sls <- ivreg(gini ~ bb100hab + log(pop.dens)  + gov.exp + trade + non.agri + gdp.growth + log(gdppc) +  log(pop) 
+                      + as.factor(year) + as.factor(country) |
+                      log(pop.dens)  + gov.exp + trade + non.agri + gdp.growth + log(gdppc) +  log(pop) 
+                      + as.factor(year) + as.factor(country)  +
+                      fem.lab, 
+               data = data, weights = 1/(se^2))
+summary(bb.gini.2sls, vcov = sandwich, diagnostics = TRUE)
+
+fixed.gini.2sls <- ivreg(gini ~ fixed100hab + log(pop.dens)  + gov.exp + trade + non.agri + gdp.growth + log(gdppc) +  log(pop) 
+                      + as.factor(year) + as.factor(country) |
+                      log(pop.dens)  + gov.exp + trade + non.agri + gdp.growth + log(gdppc) +  log(pop) 
+                      + as.factor(year) + as.factor(country)  +
+                      fem.lab, 
+               data = data, weights = 1/(se^2))
+summary(fixed.gini.2sls, vcov = sandwich, diagnostics = TRUE)
+
+mobile.gini.2sls <- ivreg(gini ~ mobile100hab + log(pop.dens)  + gov.exp + trade + non.agri + gdp.growth + log(gdppc) +  log(pop) 
+                      + as.factor(year) + as.factor(country) |
+                      log(pop.dens)  + gov.exp + trade + non.agri + gdp.growth + log(gdppc) +  log(pop) 
+                      + as.factor(year) + as.factor(country)  +
+                      fem.lab, 
+               data = data, weights = 1/(se^2))
+summary(mobile.gini.2sls, vcov = sandwich, diagnostics = TRUE)
+
+net.gini.2sls.rse <- coeftest(net.gini.2sls, function(x) vcovHC(x, type="HC0"))
+summ.net.gini.2sls <- summary(net.gini.2sls, vcov. = function(x) vcovHC(x, type="HC0"), diagnostics=T)
+
+bb.gini.2sls.rse <- coeftest(bb.gini.2sls, function(x) vcovHC(x, type="HC0"))
+summ.bb.gini.2sls <- summary(bb.gini.2sls, vcov. = function(x) vcovHC(x, type="HC0"), diagnostics=T)
+
+fixed.gini.2sls.rse <- coeftest(fixed.gini.2sls, function(x) vcovHC(x, type="HC0"))
+summ.fixed.gini.2sls <- summary(fixed.gini.2sls, vcov. = function(x) vcovHC(x, type="HC0"), diagnostics=T)
+
+mobile.gini.2sls.rse <- coeftest(mobile.gini.2sls, function(x) vcovHC(x, type="HC0"))
+summ.mobile.gini.2sls <- summary(mobile.gini.2sls, vcov. = function(x) vcovHC(x, type="HC0"), diagnostics=T)
+```
+
+```{r, echo=FALSE, warning=FALSE, results='asis'}
+stargazer(net.gini.2sls, bb.gini.2sls, fixed.gini.2sls, mobile.gini.2sls, type = "latex",
+          se = list(net.gini.2sls.rse[,"Std. Error"], bb.gini.2sls.rse[,"Std. Error"],
+                    fixed.gini.2sls.rse[,"Std. Error"], mobile.gini.2sls.rse[,"Std. Error"]),
+          header = FALSE,
+          no.space=TRUE,
+          title = "2SLS estimation of equation (3), alt. specifications (i)\\label{2sls.gini.global}",
+          font.size = "small",
+          column.sep.width = "1pt",
+          dep.var.labels=c("Gini coefficient 2000-18"),
+          column.separate = c(1,1,1,1),
+          covariate.labels=c("Internet users per 100 hab. (log)",
+                             "Broadband users per 100 hab. (log)",
+                             "Mobile phone users per 100 hab. (log)",
+                             "Fixed phone users per 100 hab. (log)",
+                             "Population density (log)",
+                             "Government expenditure (\\% GDP)",
+                             "Trade (\\% of GDP)",
+                             "Non agriculture value added (\\% GDP)",
+                             "GDP growth",
+                             "GDP per capita (log)",
+                             "Population (log)"),
+          single.row = FALSE, df = FALSE,
+          omit = c("country", "year"),
+          omit.stat = c("rsq", "f"),
+          add.lines = list(c(rownames(summ.net.gini.2sls$diagnostics)[1], # use rownames as line name. in this case Weak insterumetns
+                             round(summ.net.gini.2sls$diagnostics[1, "statistic"], 2),
+                             round(summ.bb.gini.2sls$diagnostics[1, "statistic"], 2),
+                             round(summ.fixed.gini.2sls$diagnostics[1, "statistic"], 2),
+                             round(summ.mobile.gini.2sls$diagnostics[1, "statistic"], 2)),
+                           c(rownames(summ.net.gini.2sls$diagnostics)[2],
+                             round(summ.net.gini.2sls$diagnostics[2, "statistic"], 2),
+                             round(summ.bb.gini.2sls$diagnostics[2, "statistic"], 2),
+                             round(summ.fixed.gini.2sls$diagnostics[2, "statistic"], 2),
+                             round(summ.mobile.gini.2sls$diagnostics[2, "statistic"], 2)),
+                           c("P-value",
+                             round(summ.net.gini.2sls$diagnostics[2, "p-value"], 2),
+                             round(summ.bb.gini.2sls$diagnostics[2, "p-value"], 2),
+                             round(summ.fixed.gini.2sls$diagnostics[2, "p-value"], 2),
+                             round(summ.mobile.gini.2sls$diagnostics[2, "p-value"], 2)),
+                           # c(rownames(summ.net.2sls$diagnostics)[3],
+                           #   round(summ.net.2sls$diagnostics[3, "statistic"], 2),
+                           #   round(summ.bb.2sls$diagnostics[3, "statistic"], 2),
+                           #   round(summ.fixed.2sls$diagnostics[3, "statistic"], 2),
+                           #   round(summ.mobile.2sls$diagnostics[3, "statistic"], 2)),
+                           # c("P-value",
+                           #   round(summ.net.2sls$diagnostics[3, "p-value"], 2),
+                           #   round(summ.bb.2sls$diagnostics[3, "p-value"], 2),
+                           #   round(summ.fixed.2sls$diagnostics[3, "p-value"], 2),
+                           #   round(summ.mobile.2sls$diagnostics[3, "p-value"], 2)),
+                           c("Country fixed effects", "Yes", "Yes", "Yes", "Yes"),
+                           c("Yearly fixed effects", "Yes", "Yes", "Yes", "Yes")),
+          notes = c("Robust Std. Errors in parenthesis",
+                    "IV: Female participation in labour force"))
+
+```
+
+```{r, echo=FALSE, warning=FALSE, results='hide', message=FALSE}
+
+# herf
+
+net.herf.2sls <- ivreg(herf ~ net100hab + log(pop.dens)  + gov.exp + trade + non.agri + gdp.growth + log(gdppc) +  log(pop) 
+                      + as.factor(year) + as.factor(country) |
+                      log(pop.dens)  + gov.exp + trade + non.agri + gdp.growth + log(gdppc) +  log(pop) 
+                      + as.factor(year) + as.factor(country)  +
+                      fem.lab, 
+               data = data, weights = 1/(se^2))
+summary(net.herf.2sls, vcov = sandwich, diagnostics = TRUE)
+
+bb.herf.2sls <- ivreg(herf ~ bb100hab + log(pop.dens)  + gov.exp + trade + non.agri + gdp.growth + log(gdppc) +  log(pop) 
+                      + as.factor(year) + as.factor(country) |
+                      log(pop.dens)  + gov.exp + trade + non.agri + gdp.growth + log(gdppc) +  log(pop) 
+                      + as.factor(year) + as.factor(country)  +
+                      fem.lab, 
+               data = data, weights = 1/(se^2))
+summary(bb.herf.2sls, vcov = sandwich, diagnostics = TRUE)
+
+fixed.herf.2sls <- ivreg(herf ~ fixed100hab + log(pop.dens)  + gov.exp + trade + non.agri + gdp.growth + log(gdppc) +  log(pop) 
+                      + as.factor(year) + as.factor(country) |
+                      log(pop.dens)  + gov.exp + trade + non.agri + gdp.growth + log(gdppc) +  log(pop) 
+                      + as.factor(year) + as.factor(country)  +
+                      fem.lab, 
+               data = data, weights = 1/(se^2))
+summary(fixed.herf.2sls, vcov = sandwich, diagnostics = TRUE)
+
+mobile.herf.2sls <- ivreg(herf ~ mobile100hab + log(pop.dens)  + gov.exp + trade + non.agri + gdp.growth + log(gdppc) +  log(pop) 
+                      + as.factor(year) + as.factor(country) |
+                      log(pop.dens)  + gov.exp + trade + non.agri + gdp.growth + log(gdppc) +  log(pop) 
+                      + as.factor(year) + as.factor(country)  +
+                      fem.lab, 
+               data = data, weights = 1/(se^2))
+summary(mobile.herf.2sls, vcov = sandwich, diagnostics = TRUE)
+
+net.herf.2sls.rse <- coeftest(net.herf.2sls, function(x) vcovHC(x, type="HC0"))
+summ.net.herf.2sls <- summary(net.herf.2sls, vcov. = function(x) vcovHC(x, type="HC0"), diagnostics=T)
+
+bb.herf.2sls.rse <- coeftest(bb.herf.2sls, function(x) vcovHC(x, type="HC0"))
+summ.bb.herf.2sls <- summary(bb.herf.2sls, vcov. = function(x) vcovHC(x, type="HC0"), diagnostics=T)
+
+fixed.herf.2sls.rse <- coeftest(fixed.herf.2sls, function(x) vcovHC(x, type="HC0"))
+summ.fixed.herf.2sls <- summary(fixed.herf.2sls, vcov. = function(x) vcovHC(x, type="HC0"), diagnostics=T)
+
+mobile.herf.2sls.rse <- coeftest(mobile.herf.2sls, function(x) vcovHC(x, type="HC0"))
+summ.mobile.herf.2sls <- summary(mobile.herf.2sls, vcov. = function(x) vcovHC(x, type="HC0"), diagnostics=T)
+```
+
+```{r, echo=FALSE, warning=FALSE, results='asis'}
+stargazer(net.herf.2sls, bb.herf.2sls, fixed.herf.2sls, mobile.herf.2sls, type = "latex",
+          se = list(net.herf.2sls.rse[,"Std. Error"], bb.herf.2sls.rse[,"Std. Error"],
+                    fixed.herf.2sls.rse[,"Std. Error"], mobile.herf.2sls.rse[,"Std. Error"]),
+          header = FALSE,
+          no.space=TRUE,
+          title = "2SLS estimation of equation (3), alt. specifications (ii)\\label{2sls.herf.global}",
+          font.size = "small",
+          column.sep.width = "1pt",
+          dep.var.labels=c("Herfindahl-Hirschman coefficient 2000-18"),
+          column.separate = c(1,1,1,1),
+          covariate.labels=c("Internet users per 100 hab. (log)",
+                             "Broadband users per 100 hab. (log)",
+                             "Mobile phone users per 100 hab. (log)",
+                             "Fixed phone users per 100 hab. (log)",
+                             "Population density (log)",
+                             "Government expenditure (\\% GDP)",
+                             "Trade (\\% of GDP)",
+                             "Non agriculture value added (\\% GDP)",
+                             "GDP growth",
+                             "GDP per capita (log)",
+                             "Population (log)"),
+          single.row = FALSE, df = FALSE,
+          omit = c("country", "year"),
+          omit.stat = c("rsq", "f"),
+          add.lines = list(c(rownames(summ.net.herf.2sls$diagnostics)[1], # use rownames as line name. in this case Weak insterumetns
+                             round(summ.net.herf.2sls$diagnostics[1, "statistic"], 2),
+                             round(summ.bb.herf.2sls$diagnostics[1, "statistic"], 2),
+                             round(summ.fixed.herf.2sls$diagnostics[1, "statistic"], 2),
+                             round(summ.mobile.herf.2sls$diagnostics[1, "statistic"], 2)),
+                           c(rownames(summ.net.herf.2sls$diagnostics)[2],
+                             round(summ.net.herf.2sls$diagnostics[2, "statistic"], 2),
+                             round(summ.bb.herf.2sls$diagnostics[2, "statistic"], 2),
+                             round(summ.fixed.herf.2sls$diagnostics[2, "statistic"], 2),
+                             round(summ.mobile.herf.2sls$diagnostics[2, "statistic"], 2)),
+                           c("P-value",
+                             round(summ.net.herf.2sls$diagnostics[2, "p-value"], 2),
+                             round(summ.bb.herf.2sls$diagnostics[2, "p-value"], 2),
+                             round(summ.fixed.herf.2sls$diagnostics[2, "p-value"], 2),
+                             round(summ.mobile.herf.2sls$diagnostics[2, "p-value"], 2)),
+                           # c(rownames(summ.net.2sls$diagnostics)[3],
+                           #   round(summ.net.2sls$diagnostics[3, "statistic"], 2),
+                           #   round(summ.bb.2sls$diagnostics[3, "statistic"], 2),
+                           #   round(summ.fixed.2sls$diagnostics[3, "statistic"], 2),
+                           #   round(summ.mobile.2sls$diagnostics[3, "statistic"], 2)),
+                           # c("P-value",
+                           #   round(summ.net.2sls$diagnostics[3, "p-value"], 2),
+                           #   round(summ.bb.2sls$diagnostics[3, "p-value"], 2),
+                           #   round(summ.fixed.2sls$diagnostics[3, "p-value"], 2),
+                           #   round(summ.mobile.2sls$diagnostics[3, "p-value"], 2)),
+                           c("Country fixed effects", "Yes", "Yes", "Yes", "Yes"),
+                           c("Yearly fixed effects", "Yes", "Yes", "Yes", "Yes")),
+          notes = c("Robust Std. Errors in parenthesis",
+                    "IV: Female participation in labour force"))
+
+```
+
+```{r, echo=FALSE, warning=FALSE, results='hide', message=FALSE}
+
+# cv
+
+net.cv.2sls <- ivreg(cv ~ net100hab + log(pop.dens)  + gov.exp + trade + non.agri + gdp.growth + log(gdppc) +  log(pop) 
+                      + as.factor(year) + as.factor(country) |
+                      log(pop.dens)  + gov.exp + trade + non.agri + gdp.growth + log(gdppc) +  log(pop) 
+                      + as.factor(year) + as.factor(country)  +
+                      fem.lab, 
+               data = data, weights = 1/(se^2))
+summary(net.cv.2sls, vcov = sandwich, diagnostics = TRUE)
+
+bb.cv.2sls <- ivreg(cv ~ bb100hab + log(pop.dens)  + gov.exp + trade + non.agri + gdp.growth + log(gdppc) +  log(pop) 
+                      + as.factor(year) + as.factor(country) |
+                      log(pop.dens)  + gov.exp + trade + non.agri + gdp.growth + log(gdppc) +  log(pop) 
+                      + as.factor(year) + as.factor(country)  +
+                      fem.lab, 
+               data = data, weights = 1/(se^2))
+summary(bb.cv.2sls, vcov = sandwich, diagnostics = TRUE)
+
+fixed.cv.2sls <- ivreg(cv ~ fixed100hab + log(pop.dens)  + gov.exp + trade + non.agri + gdp.growth + log(gdppc) +  log(pop) 
+                      + as.factor(year) + as.factor(country) |
+                      log(pop.dens)  + gov.exp + trade + non.agri + gdp.growth + log(gdppc) +  log(pop) 
+                      + as.factor(year) + as.factor(country)  +
+                      fem.lab, 
+               data = data, weights = 1/(se^2))
+summary(fixed.cv.2sls, vcov = sandwich, diagnostics = TRUE)
+
+mobile.cv.2sls <- ivreg(cv ~ mobile100hab + log(pop.dens)  + gov.exp + trade + non.agri + gdp.growth + log(gdppc) +  log(pop) 
+                      + as.factor(year) + as.factor(country) |
+                      log(pop.dens)  + gov.exp + trade + non.agri + gdp.growth + log(gdppc) +  log(pop) 
+                      + as.factor(year) + as.factor(country)  +
+                      fem.lab, 
+               data = data, weights = 1/(se^2))
+summary(mobile.cv.2sls, vcov = sandwich, diagnostics = TRUE)
+
+net.cv.2sls.rse <- coeftest(net.cv.2sls, function(x) vcovHC(x, type="HC0"))
+summ.net.cv.2sls <- summary(net.cv.2sls, vcov. = function(x) vcovHC(x, type="HC0"), diagnostics=T)
+
+bb.cv.2sls.rse <- coeftest(bb.cv.2sls, function(x) vcovHC(x, type="HC0"))
+summ.bb.cv.2sls <- summary(bb.cv.2sls, vcov. = function(x) vcovHC(x, type="HC0"), diagnostics=T)
+
+fixed.cv.2sls.rse <- coeftest(fixed.cv.2sls, function(x) vcovHC(x, type="HC0"))
+summ.fixed.cv.2sls <- summary(fixed.cv.2sls, vcov. = function(x) vcovHC(x, type="HC0"), diagnostics=T)
+
+mobile.cv.2sls.rse <- coeftest(mobile.cv.2sls, function(x) vcovHC(x, type="HC0"))
+summ.mobile.cv.2sls <- summary(mobile.cv.2sls, vcov. = function(x) vcovHC(x, type="HC0"), diagnostics=T)
+```
+
+```{r, echo=FALSE, warning=FALSE, results='asis'}
+stargazer(net.cv.2sls, bb.cv.2sls, fixed.cv.2sls, mobile.cv.2sls, type = "latex",
+          se = list(net.cv.2sls.rse[,"Std. Error"], bb.cv.2sls.rse[,"Std. Error"],
+                    fixed.cv.2sls.rse[,"Std. Error"], mobile.cv.2sls.rse[,"Std. Error"]),
+          header = FALSE,
+          no.space=TRUE,
+          title = "2SLS estimation of equation (3), alt. specifications (iii)\\label{2sls.cv.global}",
+          font.size = "small",
+          column.sep.width = "1pt",
+          dep.var.labels=c("Coefficient of variation 2000-18"),
+          column.separate = c(1,1,1,1),
+          covariate.labels=c("Internet users per 100 hab. (log)",
+                             "Broadband users per 100 hab. (log)",
+                             "Mobile phone users per 100 hab. (log)",
+                             "Fixed phone users per 100 hab. (log)",
+                             "Population density (log)",
+                             "Government expenditure (\\% GDP)",
+                             "Trade (\\% of GDP)",
+                             "Non agriculture value added (\\% GDP)",
+                             "GDP growth",
+                             "GDP per capita (log)",
+                             "Population (log)"),
+          single.row = FALSE, df = FALSE,
+          omit = c("country", "year"),
+          omit.stat = c("rsq", "f"),
+          add.lines = list(c(rownames(summ.net.cv.2sls$diagnostics)[1], # use rownames as line name. in this case Weak insterumetns
+                             round(summ.net.cv.2sls$diagnostics[1, "statistic"], 2),
+                             round(summ.bb.cv.2sls$diagnostics[1, "statistic"], 2),
+                             round(summ.fixed.cv.2sls$diagnostics[1, "statistic"], 2),
+                             round(summ.mobile.cv.2sls$diagnostics[1, "statistic"], 2)),
+                           c(rownames(summ.net.cv.2sls$diagnostics)[2],
+                             round(summ.net.cv.2sls$diagnostics[2, "statistic"], 2),
+                             round(summ.bb.cv.2sls$diagnostics[2, "statistic"], 2),
+                             round(summ.fixed.cv.2sls$diagnostics[2, "statistic"], 2),
+                             round(summ.mobile.cv.2sls$diagnostics[2, "statistic"], 2)),
+                           c("P-value",
+                             round(summ.net.cv.2sls$diagnostics[2, "p-value"], 2),
+                             round(summ.bb.cv.2sls$diagnostics[2, "p-value"], 2),
+                             round(summ.fixed.cv.2sls$diagnostics[2, "p-value"], 2),
+                             round(summ.mobile.cv.2sls$diagnostics[2, "p-value"], 2)),
+                           # c(rownames(summ.net.2sls$diagnostics)[3],
+                           #   round(summ.net.2sls$diagnostics[3, "statistic"], 2),
+                           #   round(summ.bb.2sls$diagnostics[3, "statistic"], 2),
+                           #   round(summ.fixed.2sls$diagnostics[3, "statistic"], 2),
+                           #   round(summ.mobile.2sls$diagnostics[3, "statistic"], 2)),
+                           # c("P-value",
+                           #   round(summ.net.2sls$diagnostics[3, "p-value"], 2),
+                           #   round(summ.bb.2sls$diagnostics[3, "p-value"], 2),
+                           #   round(summ.fixed.2sls$diagnostics[3, "p-value"], 2),
+                           #   round(summ.mobile.2sls$diagnostics[3, "p-value"], 2)),
+                           c("Country fixed effects", "Yes", "Yes", "Yes", "Yes"),
+                           c("Yearly fixed effects", "Yes", "Yes", "Yes", "Yes")),
+          notes = c("Robust Std. Errors in parenthesis",
+                    "IV: Female participation in labour force"))
+
+```
+
