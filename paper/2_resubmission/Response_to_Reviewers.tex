@@ -1,0 +1,254 @@
+\documentclass[11pt, a4paper, answers]{exam}
+
+\usepackage{shadow, fancybox, a4wide, bm, harvard, epsfig, theorem,  epic, verbatim, amsmath, amssymb,  microtype, fullpage, setspace, caption, makeidx, subfigure, marvosym, booktabs, dcolumn, mdwlist, lastpage, tikz, eurosym}
+\usepackage[OT1]{fontenc}
+\usepackage[utf8]{inputenx}
+\renewcommand{\baselinestretch}{1.25}
+
+
+%\hypersetup{%
+%	colorlinks,urlcolor=blue,
+%	pdfborder = {0 0 0}
+%}
+
+\usepackage{xcolor}
+%\definecolor{SolutionColor}{rgb}{0.1,0.3,1}
+%\renewcommand{\thequestion}{\alph{question} }
+\renewcommand\questionlabel{\llap{\thequestion)}}
+
+\renewcommand{\solutiontitle}{\noindent\textbf{Response: }}
+
+
+%\pointsinrightmargin
+%\boxedpoints
+%\unframedsolutions
+\shadedsolutions
+\definecolor{SolutionColor}{rgb}{0.9,0.9,1}
+
+\begin{document}
+
+
+\noindent Dear Editor and Reviewers, \bigskip\bigskip
+
+Please find attached a report covering our detailed responses to the editor and 
+the reviewer comments. Overall, we feel the paper has been substantially improved 
+as a result of the constructive criticism and suggestions made in the  review process,
+and we would like to sincerely thank both reviewers as well as the editor for
+that. We have structured this response by listing every
+comment and immediately following it with a blue box that includes our
+response.
+
+%\today
+\clearpage
+
+\section*{Responses to Editor}
+
+\begin{questions}
+\question The second paragraph in the literature is too long. Consider breaking 
+it into two or three paragraphs based on reclassification of the literature, for example, 
+by substitution and complementarity effects, or by urban and rural areas.
+
+\begin{solution}
+\textbf{ET}
+\end{solution}
+
+\question For clarity, I would like to suggest you replace Zipf coefficient by Pareto 
+exponent unless the coefficient equals 1, as you rightfully pointed it out in the 
+paragraph below equation (1). This will help readers avoid some confusions.
+
+\begin{solution}
+\textbf{YMI}
+\end{solution}
+
+\question Please clarify in equation (3) whether you want to include time trend 
+delta*t or year fixed effect delta subscript t. You used delta*t in the equation 
+but used delta subscript t in line 234. Tables 4 and 5 say year fixed effects.
+
+\begin{solution}
+\textbf{ET}
+\end{solution}
+
+\question Using female labor force participation rate as IV for ICT usage is a bit 
+exotic. Even females stay home as housewives, don’t they still need to use phones 
+and internet at home? You did not provide any empirical evidence that female labor 
+force participation indeed increases ICT usage. It would be more convincing if 
+you can find and cite such supportive references.  
+
+\begin{solution}
+\textbf{ET}
+\end{solution}
+
+\question Table 5: the impact on Zipf coefficient is very small: 0.001 or 0.002. 
+How economically significant is this number in terms of city size distribution? 
+Particularly, since a country uses both internet and fixed line phones and they 
+have opposite, offsetting effects on Zipf coefficient, does this mean at the 
+aggregate level there is no effect on the overall city size distribution? 
+These are subtle questions and you may discuss a bit on this.
+
+\begin{solution}
+\textbf{YMI}
+\end{solution}
+
+\question Line 504: you mentioned using absolute number of broadband tests 
+in 2011 as an additional IV, isn’t it a direct measure of ICT and similar 
+to the main explanatory variable “broadband tests per capita 2011”?
+
+\begin{solution}
+\textbf{ET}
+\end{solution}
+
+\end{questions}
+
+\section*{Responses to Reviewer 1}
+
+\begin{questions}
+
+\question There are two kinds of spatial dispersion: within a city or 
+across different cities. They are conceptually different; there could be 
+decreased dispersion within a city but at the same time increased 
+dispersion across cities. Both types of spatial dispersion can be 
+affected by the advancement of information technology. This study 
+examines the “Zipf coefficient” of an urban system or a city’s rank 
+in an urban system, thus it focuses on spatial dispersion across cities. 
+Nothing is said about spatial dispersion within a city (e.g., whether 
+ICT has resulted in more urban sprawl). The authors should make this 
+clear upfront.
+
+\begin{solution}
+\textbf{YMI: maybe add a line or two in the intro where we talk about data?}
+\end{solution}
+
+\question After equation (1), it’ll be useful to add a brief discussion 
+on why the Zipf coefficient measures spatial dispersion. Many 
+readers should have seen the variance, Gini coefficient, or 
+Herfindahl index used as a measure of dispersion. I am not 
+sure how many of them has seen the Zipf coefficient, so it 
+requires some explanation. I also wonder why those other 
+measures are not used.
+
+\begin{solution}
+\textbf{YMI for the text, ET to check if we have estimates for 
+alternative measures}
+\end{solution}
+
+\question In Table 2, the Zipf coefficient ranges between -2 and -1, 
+but has a mean of -1 and a standard deviation of 0. That seems odd. 
+Also, what is the “St. error for Zipf est.” in the second row?
+
+\begin{solution}
+\textbf{ET}
+\end{solution}
+
+\question On several occasions (e.g., p. 9 and 15), the authors 
+seem to suggest that a valid IV should not affect (or be correlated 
+with) the outcome variable. This is not entirely accurate. A valid 
+IV must be correlated with the endogenous variable. Thus, if the 
+endogenous variable indeed has a causal effect on the outcome variable, 
+the IV must be correlated with the outcome variable. It would be 
+correct to say that an IV would not affect the outcome variable 
+directly and would only affect it indirectly (i.e., through the 
+endogenous variable). However, no direct effect is different 
+from a zero correlation between the IV and the outcome variable. 
+Thus showing a low correlation between the IV and the outcome 
+variable (p. 12, 15, and 18) is not informative about the validity of the IV.
+
+\begin{solution}
+\textbf{ET will remove correlations}
+\end{solution}
+
+\question In the global study, the use of an IV has reversed the 
+sign of an OLS estimate and made two statistically insignificant 
+OLS estimates become significant. In both case studies, the use 
+of an IV has produced much larger estimates than the OLS 
+estimates. If the authors really trust the IV estimates, it will be 
+helpful to discuss what have biased the OLS estimates in the 
+particular direction. For example, in both case studies, one 
+might suspect that omitted variables could bias the OLS 
+estimates upward. However, surprisingly the IV estimates 
+turned out to be even larger than the OLS estimates. How do 
+we understand this?
+
+\begin{solution}
+\textbf{ET will give first it a go then YMI }
+\end{solution}
+
+\question When using an instrumental variable, it will be 
+helpful to offer some intuition why the IV is correlated with 
+the endogenous variable. For example, why does female 
+participation in labor force affect internet and phone usage? 
+Why does the absolute number of broadband tests in 2011 
+affect the endogenous variable (Internet speed)? These are 
+not obvious, so some discussion is needed. Also, it might be 
+helpful to show (or simply mention) some of the first-stage 
+regression results to let readers know how the IV and the 
+endogenous variable are correlated. For example, I would 
+like to know whether and to what extent the absolute number 
+of broadband tests in 2011 increased Internet speed. This 
+information helps readers gauge whether the overall IV 
+strategy makes sense.
+
+\begin{solution}
+\textbf{ET}
+\end{solution}
+
+\question In the two case studies, I am not sure that the 
+normalization of the changed rank is helpful. I would prefer 
+to use the unnormalized change in rank as the left-hand 
+side variable for the OLS regression, because it makes the 
+key coefficient easier to interpret. Normalization allows for 
+the estimation of the quasibinomial GLM, but the GLM results 
+are never discussed. It might make sense to use the unnormalized 
+change in rank as the left-hand side variable, keep the OLS results 
+only, and simply mention the GLM exercise in a footnote.
+
+\begin{solution}
+\textbf{ET}
+\end{solution}
+
+\end{questions}
+
+\section*{Responses to Reviewer 2}
+
+\begin{questions}
+
+\question The authors used different instrumental variables for 
+the multi-county, US, and UK analyses. Why is female labor 
+participation not used as a consistent IV throughout the 
+analyses? Is it because of different contexts or limited variation? 
+The US and UK analyses also use similar yet different IV's. 
+Perhaps the authors can further discuss their rationale in changing choices of IV's.
+
+\begin{solution}
+\textbf{ET}
+\end{solution}
+
+\question In interpreting the empirical results, the authors, 
+to some extent, highlight the potential mechanism in explaining 
+the positive relationship between internet adoption and urban 
+structure. However, there is limited discussion on other interesting 
+findings. For instance, why does fixed telephony have an opposite 
+effect to internet and digital communication technologies?
+
+\begin{solution}
+\textbf{YMI, maybe an argument based on time/maturity of technology/link to the 
+2008 paper?}
+\end{solution}
+
+\question Visualizing the patterns in Table 1 in the format of maps 
+may make the information more reader friendly.
+
+\begin{solution}
+\textbf{ET}
+\end{solution}
+
+\question There are minor formatting issues and typos throughout 
+the paper. For examples, "Government expenditure ( Trade (\% of GDP)" 
+in Table 4 and "cites" in line 343.
+
+\begin{solution}
+\textbf{ET}
+\end{solution}
+\end{questions}
+
+\clearpage
+\end{document}

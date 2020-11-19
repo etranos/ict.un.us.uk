@@ -3,7 +3,7 @@ title: "S1 Appendix"
 author: ""
 output: pdf_document
 knit: (function(inputFile, encoding) {
-    rmarkdown::render(inputFile, encoding = encoding, output_dir = "../outputs")
+    rmarkdown::render(inputFile, encoding = encoding, output_dir = "../paper/2_resubmission")
   })
 ---
 
@@ -12,7 +12,7 @@ knit: (function(inputFile, encoding) {
 # This .Rmd create teh S1 Appendix for the estimation of eq. 3
 # using alternative specifications: Gini, Herfindahl-Hirschman
 # and CV. 
-# The output S1.pdf is located in /outputs
+# The output S1.pdf is located in /paper/2_resubmission
 
 library(rmarkdown)
 library(data.table)
