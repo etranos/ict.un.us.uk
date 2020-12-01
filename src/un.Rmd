@@ -519,13 +519,6 @@ net.2sls <- ivreg(b ~ net100hab + log(pop.dens)  + gov.exp + trade + non.agri + 
                data = data, weights = 1/(se^2))
 summary(net.2sls, vcov = sandwich, diagnostics = TRUE)
 
-net.2sls1 <- ivreg(net100hab ~ log(pop.dens)  + gov.exp + trade + non.agri + gdp.growth + log(gdppc) +  log(pop) 
-                      + as.factor(year) + as.factor(country)  +
-                      fem.lab, 
-               data = data, weights = 1/(se^2))
-summary(net.2sls1)
-
-
 # net.2sls.2 <- ivreg(b ~ net100hab + log(pop.dens)  + gov.exp + trade + non.agri + gdp.growth + log(gdppc) +  log(pop) 
 #                       + as.factor(year) + as.factor(country) |
 #                       log(pop.dens)  + gov.exp + trade + non.agri + gdp.growth + log(gdppc) +  log(pop) 

@@ -15,7 +15,7 @@ address:
     address: Tufts University, Department of Economics, Medford, MA, USA
 abstract: |
     This paper examines the impact of widespread adoption of information and communication technologies (ICT) on urban structure worldwide. Has it offset agglomeration benefits and led to more dispersed spatial structures, or has it strengthened urban externalities and thus resulted in more concentrated spatial structures? Theoretical and empirical studies on this question have produced contradictory findings. The present study recognizes that assumptions made earlier about the evolution of technological capabilities do not necessarily hold today. As cutting-edge digital technologies have matured considerably, a fresh look at this question is called for.
-    
+
     The paper addresses this issue by means of several data sets using instrumental variable methods. One is the UN data on Urban Settlements with more than $300,000$ inhabitants. Estimation methods with these data show that increased adoption of ICT  has resulted in national urban systems that are less uniform in terms of city sizes and are characterized by higher population concentrations in larger cities, when concentration is proxied the Pareto (Zipf) coefficient for national city size distributions. Two, is disaggregated data for the urban systems of the US, defined as Micropolitan and Metropolitan Areas, and for the UK, defined as Built-up Areas in England and Wales, respectively. These data allow for the impacts to be studied for cities smaller than those included in the cross-country data. Increased internet usage improved a city’s ranking in the US urban system. Similarly, increased download speed improves a built-up area’s ranking in England and Wales.
 
 author_summary: |
@@ -149,13 +149,13 @@ Focusing on rural areas, Partridge et al. [@mark_d_partridge_employment_2008] fi
 
 \color{blue}
 Moving beyond modelling the direct relationship between ICT and spatial structure,
-Bekkerman and Gilpin [@bekkerman_high-speed_2013] focused on the role of locally 
-based information resources using a dataset about the US libraries during the 
-period $2000-2008$. Their results suggest that internet access increases the 
-demand and the value of locally accessible information, and such complementarities 
-are higher in larger metropolitan areas. Anenberg and Kung 
-[@anenberg_information_2015] also identified a complementary relation between 
-the internet and consumption variety in cities by focusing on food truck industry 
+Bekkerman and Gilpin [@bekkerman_high-speed_2013] focused on the role of locally
+based information resources using a dataset about the US libraries during the
+period $2000-2008$. Their results suggest that internet access increases the
+demand and the value of locally accessible information, and such complementarities
+are higher in larger metropolitan areas. Anenberg and Kung
+[@anenberg_information_2015] also identified a complementary relation between
+the internet and consumption variety in cities by focusing on food truck industry
 in the US.
 
 \color{black}
@@ -176,6 +176,18 @@ Similar causal effects are established for mobile telephony, which are novel in 
 The robustness of their results is confirmed for such alternative measures of dispersion as the Gini coefficient, the Herfindahl index, and the coefficient of variation.
 This is notable because several years of additional data were used that pertain to an era of rapid expansion of the internet and web-based technologies, more generally.
 
+\color{blue}
+The present paper does not address the issue that adoption of ICT may have
+different effects on urban dispersion on a national scale, that is how far are
+major areas, that is, cities, from one another, versus dispersion within major
+urban areas, that is urban sprawl. Such an inquiry would require detailed data
+about patterns of how urban sprawl may hamper or promote economic interaction,
+given advancements in information technology.
+We think that data from the Covid-19 pandemic would likely throw light at this
+issue, as it is clear that not all economic activities might continue in an
+unencumbered manner; see Dingel and Neiman [@dingel2020many].
+\color{black}
+
 # Materials and Methods {#sec3}
 
 The main aim of this paper is to return to the estimation of the causal impact of ICT adoption on the spatial dispersion of economic activities and consequently population.
@@ -189,16 +201,39 @@ Because of limitations related with multi-country urban population data (see dis
 ## Multi-country analysis {#sec3.1}
 
 The multi-country identification strategy is a two-step approach [@ioannides2008effect].
-The first step of our methodology is to estimate the Zipf coefficient for a broad sample of countries over time.
-Zipf coefficient is one of the most widely used measures of spatial dispersion with numerous applications in urban economics and economic geography ([see for example @black_urban_2003; @frenken_theoretical_2007; @giesen_zipfs_2011; @rauch_cities_2013; @ioannides_zipfs_2003; @ioannides_walled_2017; @nitsch_zipf_2005).
-This an appropriate measure of dispersion because of the extreme heterogeneity of the city size distribution and the very good fits normally obtained with such estimations. Skipping details pertaining of the suitability of the approach, which may be found in Ioannides et al. [@ioannides2008effect] and Tranos and Ioannides [@tranos2020ict], we proceed with the estimation of the logarithmic form of:
+The first step of our methodology is to estimate the
+\color{blue}
+Pareto exponent coefficient
+\color{black}
+for a broad sample of countries over time.
+\color{blue}
+The Pareto coefficient
+\color{black}
+is one of the most widely used measures of spatial dispersion with numerous applications in urban economics and economic geography ([see for example @black_urban_2003; @frenken_theoretical_2007; @giesen_zipfs_2011; @rauch_cities_2013; @ioannides_zipfs_2003; @ioannides_walled_2017; @nitsch_zipf_2005).
+This an appropriate measure of dispersion because of the extreme heterogeneity of the city size distribution and the very good fits normally obtained with such estimations^[
+\color{blue}
+We also replicate our analysis using other measures of dispersion in Appendix S1. Our results remain consistent.].
+\color{black}
+Skipping details pertaining of the suitability of the approach, which may be found in Ioannides et al. [@ioannides2008effect] and Tranos and Ioannides [@tranos2020ict], we proceed with the estimation of the logarithmic form of:
 
 \begin{align}
 ln(rank_{i}) = ln(S_0) + \zeta ln(Size_i) + e_{i}. \label{eq1}
 \end{align}
 
-This leads to an estimate of $\zeta$, known as the Zipf coefficient, but more appropriately the Pareto exponent, when $\zeta$ is not estimated to be near $1$.
-While much of the literature focuses on the Zipf coefficient being close to $1$, several estimations of city size distributions lead to estimates  of $\zeta$ that are not necessarily equal to $1$, or even near it, in which case we refer to $\zeta$ as the Pareto, or power law, exponent. Given that our aim here is to estimate $\zeta$ for a number of countries over time as a measure of dispersion, equation \ref{eq1} describes the rank of city $i$ in country $c$ in year $t$:
+\color{blue}
+This leads to an estimate of $\zeta$, known as the Zipf coefficient,
+but more appropriately the Pareto exponent, a terminology we will adhere to for
+the remained of the text, even  when $\zeta$ is estimated to be near $1$.
+The term Zipf coefficient should be reserved for the special case of
+$\zeta=1$.
+While much of the literature focuses on the Pareto exponent being
+close to $1$, several estimations of city size distributions lead to estimates
+of $\zeta$ that are not necessarily equal to $1$, or even near it, in which
+case we refer to $\zeta$ as the Pareto, or power law, exponent.
+Given that our aim here is to estimate $\zeta$ for a number of countries over
+time as a measure of dispersion, equation \ref{eq1} describes the rank of city
+$i$ in country $c$ in year $t$:
+\color{black}
 
 \begin{align}
 ln(rank_{ict}) = ln(S_{0ct}) + \zeta_{ct} ln(Size_{ict}) + e_{ict}. \label{eq2}
@@ -227,7 +262,7 @@ load("C:/Users/nw19521/OneDrive - University of Bristol/projects/Ioannides/ict.u
 zipf.table <- net.model$model %>%
   dplyr::select(`as.factor(country)`, `as.factor(year)`, b) %>%
   spread(`as.factor(year)`, b) %>%
-  rename(`Zipf coef.` = `as.factor(country)`)
+  rename(`Countries` = `as.factor(country)`)
 
 # stargazer(zipf.table, type = "latex", digits = 3, summary = FALSE,
 #           header = FALSE,
@@ -238,7 +273,7 @@ zipf.table <- net.model$model %>%
 #           float.env = "sidewaystable")
 
 kable(zipf.table, format = "latex",
-      caption = "Zipf coefficients\\label{zipf}",
+      caption = "Pareto exponent\\label{zipf}",
       booktabs = T,
       digits = 2) %>%
   footnote(general = "Corrected as per Gabaix and Ibragimov (2011)") %>%
@@ -257,7 +292,7 @@ The second step of our methodology involves estimating the following empirical m
 \color{black}
 \noindent The model enable us to estimate the effects of a vector $X$ of explanatory variables which are included to account for the spatial structure of country $c$ in year $t$.
 The main variables of interest here are internet and digital communications variables that include: internet users per $100$ inhabitants, broadband users per $100$ inhabitants, mobile phone users per $100$ inhabitants, and fixed phone users per $100$ inhabitants.
-To address a potential omitted variable bias equation \ref{eq3} includes 
+To address a potential omitted variable bias equation \ref{eq3} includes
 \color{blue}
 country ($\theta_c$) and year ($\delta_t$) fixed effects;
 \color{black}
@@ -284,8 +319,8 @@ stargazer(as.data.frame(data[,c(5:18)]),
           font.size = "footnotesize",
           column.sep.width = "1pt",
           summary.stat = c("n", "min", "mean", "sd", "max"),
-          covariate.labels=c("Zipf coefficient",
-                             "Zipf inv. sq. error\\textsuperscript{a}",
+          covariate.labels=c("Pareto exponent",
+                             "Pareto exp. inv. sq. error\\textsuperscript{a}",
                              "Population density",
                              "Government expenditure (\\% GDP)",
                              "Trade (\\% GDP)",
@@ -298,8 +333,8 @@ stargazer(as.data.frame(data[,c(5:18)]),
                              "Broadband users per 100 hab.",
                              "Mobile phone users per 100 hab.",
                              "Fixed phone users per 100 hab."),
-          notes = c("\\textsuperscript{a}This is the inverse squared standard error of the estimated Zipf, coefficient, which is used for weighting", 
-                    "the observations for the estimation, of equation 3. See Section 4"))
+          notes = c("\\textsuperscript{a}This is the inverse squared standard error of the estimated Pareto exponent, which is used for weighting",
+                    "the observations for the estimation of equation 3. See Section 4"))
 ```
 
 
@@ -334,7 +369,7 @@ kable(corr.mat, format = "latex",
 
 The availability of a panel dataset for city sizes across countries enables us to use country fixed effects, which can address potential endogeneity issues related to unobserved country specific characteristics of city size distributions.
 However, such a strategy does not address potential simultaneity issues.
-Simply put, internet penetration might be affected by spatial structure, as reflected in Zipf coefficients, or both internet penetration and spatial structure might be jointly determined by a third variable.
+Simply put, internet penetration might be affected by spatial structure, as reflected in Pareto exponents, or both internet penetration and spatial structure might be jointly determined by a third variable.
 E.g., if a country already has a dispersed spatial structure, internet is particularly suitable in facilitating communication.
 Potential endogeneity in our specification will prevent us from being able to determine the causal impact of internet and digital communication technologies usage on spatial structure, which is the main aim of this paper. In order to address this problem, we will adopt an instrumented variable strategy.
 Table \ref{desc.global} also includes the descriptive statistics for the instrumental variable we are using and ($female\:labour\:force$), will be discussed in [Section 4](#sec4).
@@ -368,12 +403,24 @@ What we highlight here is that the estimation of equation \ref{eq4}, just like e
 # Digital technologies and spatial structure: a global view {#sec4}
 
 This section presents the estimation results of \ref{eq3}.
-The LHS variable is $\zeta$, the Zipf coefficient, as estimated according to the Gabaix and Ibragimov [@gabaix_rank_2011] correction.
-The main explanatory variables of interest are provided at the top of Table \ref{ols.global}; namely internet, broadband, mobile and fixed telephony per $100$ habitants,  expressed in natural logarithms.
+The LHS variable is $\zeta$, the
+\color{blue}
+Pareto exponent,
+\color{black}
+as estimated according to the Gabaix and Ibragimov [@gabaix_rank_2011] correction.
+The main explanatory variables of interest are provided at the top of Table \ref{ols.global}; namely internet, broadband, mobile and fixed telephony per $100$ habitants, expressed in natural logarithms.
 The main variables of interest are introduced successively on their own in the regressions reported in Table \ref{ols.global}.
 All regressions include country fixed effects to control for unobserved heterogeneity and a time trend.
-In addition, the observations are weighted with the inverse squared standard error of the estimated Zipf coefficient (see Table \ref{desc.global}) to address potential noise that is carried over from the first part of our identification strategy.
-In regards to the interpretation of the estimated coefficients, given that the Zipf coefficient has entered the regression not as an absolute value, but instead as a real number a positive coefficient for a RHS variable indicates an impact towards the decrease of the spatial dispersion of population. In other words, a positive coefficient indicates an effect towards less uniform city sizes that is more dispersion of city sizes.
+In addition, the observations are weighted with the inverse squared standard error of the estimated
+\color{blue}
+Pareto exponent
+\color{black}
+(see Table \ref{desc.global}) to address potential noise that is carried over from the first part of our identification strategy.
+In regards to the interpretation of the estimated coefficients, given that the
+\color{blue}
+Pareto exponent
+\color{black}
+has entered the regression not as an absolute value, but instead as a real number a positive coefficient for a RHS variable indicates an impact towards the decrease of the spatial dispersion of population. In other words, a positive coefficient indicates an effect towards less uniform city sizes that is more dispersion of city sizes.
 The latter is indicative of enhancement of agglomeration economies because of the expansion of digital technologies.
 
 ```{r, echo=FALSE, warning=FALSE, results='asis'}
@@ -391,7 +438,7 @@ stargazer(net.model, bb.model, fixed.model, mobile.model, type="latex",
           font.size = "small",
           column.sep.width = "1pt",
           se = list(net.rse[,"Std. Error"], bb.rse[,"Std. Error"], fixed.rse[,"Std. Error"], mobile.rse[, "Std. Error"]),
-          dep.var.labels=c("Zipf Coefficient 2000-18"),
+          dep.var.labels=c("Pareto exponent 2000-18"),
           column.separate = c(1,1,1,1),
           covariate.labels=c("Internet users per 100 hab. (log)",
                              "Broadband users per 100 hab. (log)",
@@ -409,14 +456,18 @@ stargazer(net.model, bb.model, fixed.model, mobile.model, type="latex",
           add.lines = list(c("Country fixed effects", "Yes", "Yes", "Yes", "Yes"),
                            c("Yearly fixed effects", "Yes", "Yes", "Yes", "Yes")),
           omit.stat = c("rsq", "f"),
-          notes = "Robust Std. Errors in parenthesis") #, corrected Zipf coefficient following Gabaix and Ibragimov (2011)")
+          notes = "Robust std. errors in parenthesis") #, corrected Zipf coefficient following Gabaix and Ibragimov (2011)")
 ```
 
 Table \ref{ols.global} and \ref{2sls.global} report the estimation results based on the UN urban agglomeration data.
 Starting with the former, we note that an agglomerative effect is only detected for the internet users and while a marginally opposing result can be seen for broadband users as indicated by the significant coefficients in columns (1) and (2).
 For the telephony variables the estimation of \ref{eq3} did not yield statistically significant coefficients.
 Before discussing further these results and the effects of the other control variables, we need to highlight that the main challenge of estimating equation \ref{eq3} is the potential endogenous nature of the share of internet users which might prevent us from being able to infer a truly causal effect.
-Endogeneity might be an issue here as spatial structure, which is proxied by the Zipf coefficient, might be affected by another source, which also affects internet penetration.
+Endogeneity might be an issue here as spatial structure, which is proxied by the
+\color{blue}
+Pareto exponent,
+\color{black}
+might be affected by another source, which also affects internet penetration.
 For instance, economic development might affect the concentration of population in large cities and at the same time enable more people to go online.
 If we do not address this issue, the coefficient for the main variable of interest will capture potential effects that internet penetration has on spatial structure, but also potential reverse causality effects that spatial structure might generate on internet penetration.
 To overcome this potential problem, Table \ref{2sls.global} reports estimates of equation \ref{eq3} using two-stage least squares (2SLS) with instrumental variables (IVs).
@@ -449,7 +500,7 @@ stargazer(net.2sls, bb.2sls, fixed.2sls, mobile.2sls, type = "latex",
           title = "2SLS estimation of equation (3)\\label{2sls.global}",
           font.size = "small",
           column.sep.width = "1pt",
-          dep.var.labels=c("Zipf Coefficient 2000-18"),
+          dep.var.labels=c("Pareto exponent 2000-18"),
           column.separate = c(1,1,1,1),
           covariate.labels=c("Internet users per 100 hab. (log)",
                              "Broadband users per 100 hab. (log)",
@@ -492,8 +543,9 @@ stargazer(net.2sls, bb.2sls, fixed.2sls, mobile.2sls, type = "latex",
                            #   round(summ.mobile.2sls$diagnostics[3, "p-value"], 2)),
                            c("Country fixed effects", "Yes", "Yes", "Yes", "Yes"),
                            c("Yearly fixed effects", "Yes", "Yes", "Yes", "Yes")),
-          notes = c("Robust Std. Errors in parenthesis",
-                    "IV: Female participation in labour force"))
+          notes = c("Robust std. errors in parenthesis",
+                    "IV: Female participation in labour force",
+                    "First stage regressions can be found in S2"))
 ```
 
 The main challenge for such an exercise is to find a valid IV.
@@ -501,11 +553,11 @@ In our case, the challenge is even bigger as we need to find a variable which is
 This is particularly difficult for a diverse sample of countries as the one we are dealing with here.
 We propose here the percentage of female participation in the labor force, which is directly related to digital infrastructure, but not to spatial structure (see Table \ref{desc.global} for the descriptive statistics).
 \color{blue}
-The literature provides empirical and theoretical evidence that ICT are correlated with increase in female participation in labour markets mostly because they enable teleworking [@dettling2017; @arntz2019working; @watson2018digitalisation; @Lechman2020; @Valberg2020]
+The literature provides empirical and theoretical evidence that ICT are correlated with female participation in labour markets mostly because they enable teleworking [@dettling2017; @arntz2019working; @watson2018digitalisation; @Lechman2020; @Valberg2020]
 \color{black}
 At the same time, female labor participation is not related with spatial structure especially given the diverse sample of countries.
 <!-- Firstly, the correlation coefficient between the IV and the Zipf coefficient is very low ($-0.14$). -->
-Although one might think that increased female labor participation may lead to relocation of households to large cities and therefore affect the spatial structure of cites, such a process varies a lot within our dataset.
+Although one might think that increased female labor participation may lead to relocation of households to large cities and therefore affect the spatial structure of cities, such a process varies a lot within our dataset.
 Even if this might be true for developed countries with mature urban systems for which a location within a large urban center might provide opportunities for both male and female workers to find jobs, our dataset also includes countries, $41$ per cent of the GDP of which is attributed to primary activities (see Table \ref{desc.global}).
 So, female labor participation might also be related to economic activities located outside large urban centers.
 In terms of the relevant tests presented in Table \ref{2sls.global} the weak identification first stage F-test exceeds by far all the Stock-Yogo critical values for all, but the mobile telephony regression.
@@ -514,6 +566,12 @@ Hence, we are confident to interpret the effects of internet, broadband internet
 The estimations presented in Table \ref{2sls.global} indicate that increases in internet and broadband internet usage have resulted to a decrease of the spatial dispersion of population for the time period and for the panel of countries included in our data.
 In other words, increases in internet and digital communications resulted to national urban systems which are less uniform in terms of city sizes and are characterized by higher population concentrations in larger cities.
 The exact opposite appears to happen for fixed telephony, which our results indicate that has led to an increase of spatial dispersion of population.
+\color{blue}
+We expect that the IV estimates capture the local average treatment effect
+[@angrist1995identification] of these labour markets, which are characterised by
+more active engage with the internet, and, therefore, experience a larger effect
+on the Pareto exponents.
+\color{black}
 Importantly, our identification strategy enables us to address potential reverse causality issues and treat the results of Table \ref{2sls.global} as causal. Hence, the main finding of our multi-country, global analysis based on data for urban agglomerations of at least 300,000 inhabitants is that internet and broadband internet usage appear to act in favor of agglomeration economies and result to urban systems with more dominant cities on the top of the urban hierarchy.
 On the contrary, fixed telephony usage acted in favour of centrifugal forces.
 Our identification strategy does not enable us to make similar interpretations for mobile telephony usage.
@@ -524,10 +582,31 @@ Namely, GDP per capita has a negative effect which indicates that wealthier coun
 
 In total, the results indicate that our measures of internet and telephony penetration have further enhanced agglomeration forces, at least for large urban agglomerations, while the opposite happens for fixed telephony.
 These results are robust against endogeneity issues, but are limited to urban agglomeration included in our data.
-Indeed, for the estimation of the Zipf coefficient we only included urban agglomeration of $300,000$ inhabitants or more due to data availability.
+Indeed, for the estimation of the
+\color{blue}
+Pareto exponent
+\color{black}
+we only included urban agglomeration of $300,000$ inhabitants or more due to data availability.
 Hence, the above estimations cannot verify whether such an effect is also valid for smaller cities.
 Interestingly, the above results regarding the role of fixed telephony are in agreement with previous results from [@ioannides2008effect] [@tranos2020ict] which used a smaller panel of countries but without constraints regarding the city size.
 However, our results do not support the findings of [@tranos2020ict] regarding internet usage.
+
+\color{blue}
+It is indeed puzzling that the results on Table \ref{2sls.global} that the
+effects on urban concentration for internet users and broadband users, on the
+one hand, and mobile and fixed telephony users are in opposite directions.
+We wish to broach this subject in the context of some related literature,
+namely [@calabrese2011interplay] and [@buchel2020cities].
+The latter supports the notion that ICT favors agglomeration in the sense that
+in spite of their convenience modern technologies do no make up for the need of
+proximity in  social interactions.
+The former supports the notion people who communicate more frequently are likely
+to be near one another.
+ICT, as viewed through such granular studies of individuals' communications
+does not make up for physical distance; individuals nearer one another
+communicate more.  
+\color{black}
+
 In order to overcome the city size limitation, the next section presents two case studies, for which we have obtained much more granular data and therefore we are in a position to test the effect of the internet on the tail of the urban population distribution for these countries.
 
 # The impact of ICT on the US and the UK spatial structures {#sec5}
@@ -555,7 +634,7 @@ stargazer(as.data.frame(data.for.decr),
           font.size = "small",
           single.row = FALSE,
           column.sep.width = "1pt",
-          covariate.labels=c("normalized difference in ranks, 2013-18",
+          covariate.labels=c("difference in ranks, 2013-18",
                              "households w. internet 2013, \\%",
                              "population 2013",
                              "\\% of unemployment 2013",
@@ -569,9 +648,16 @@ stargazer(as.data.frame(data.for.decr),
                              "commute in minutes, 2005"))
 ```
 
-The LHS variable we use here is the outcome of equation \ref{eq5} in a normalized form^[$$Normalized\:difference\:in\:ranks_{i} = \frac{difference\:in\:ranks_{i} + N_{cities}}{2xN_{cities}}.$$]
-, so as that variable is bounded between $0$ and $1$ and with a mean of $0.5$.
-This transformation enables us to estimate \ref{eq4} not only with OLS, but also with a quasibinomial GLM estimator given that the original form of our LHS variable does not vary continuously, but is instead defined as a difference between two count variables, which may also assume negative values.
+The LHS variable we use here is the outcome of equation \ref{eq5}.
+\color{blue}
+We use this variable to estimate \ref{eq4} with OLS.
+Additionally, we employ a normalized form of the dependent variable, so as that
+variable is bounded between $0$ and $1$ and with a mean of  $0.5$^[$$Normalized\:difference\:in\:ranks_{i} = \frac{difference\:in\:ranks_{i} + N_{cities}}{2xN_{cities}}.$$].
+This transformation enables us to estimate \ref{eq4}
+with a quasibinomial GLM estimator given that the original form of our LHS
+variable does not vary continuously, but is instead defined as a difference between
+two count variables, which may also assume negative values.
+\color{blue}
 The results of the different estimations remain qualitatively the same regardless of the form of the LHS variable we use.
 Table \ref{ols.usa} reports the results of the estimation of equation \ref{eq4} using OLS.
 The sign and significance of the main variable of interest -- percentage of population with computer and broadband connection -- verifies our global level results.
@@ -593,13 +679,15 @@ stargazer(base, int_density, int_pop, base_glm, type="latex",
           summary = F,
           header = FALSE,
           no.space=TRUE,
-          title = "OLS estimation of equation (4) for USA\\label{ols.usa}",
+          title = "OLS and GLM estimations of equation (4) for USA\\label{ols.usa}",
           font.size = "small",
           column.sep.width = "1pt",
-          column.labels   = c("OLS", "GLM"),
-          column.separate = c(3, 1),
-          model.names = FALSE,
-          dep.var.labels=c("Normalized difference in ranks 2013-18"),
+          #column.labels   = c("OLS", "GLM"),
+          column.separate = 4, #c(3, 1),
+          model.names = F,
+          dep.var.labels.include = F,
+          column.labels = "Difference in ranks, 2013-18",
+          #dep.var.labels=c("Difference in ranks, 2013-18"),
           covariate.labels=c("\\% of households w. internet 2013",
                              "population 2013 (log)",
                              "\\% of unemployment 2013",
@@ -614,13 +702,20 @@ stargazer(base, int_density, int_pop, base_glm, type="latex",
                              2013 x population, 2013"),
           single.row = FALSE,
           df = FALSE,
-          omit.stat = c("rsq", "f"), notes = "Robust Std. Errors in parenthesis")
+          omit.stat = c("rsq", "f"),
+          notes = c("(1)-(3) is based on OLS, (4) on GLM",
+                    "For the GLM the Normalized diff. in ranks is used",
+                    "Robust std. errors in parenthesis"))
 ```
 
-Although not directly comparable, the above estimations are in accordance with our global model. In addition, the potential presence of endogeneity might be a problem here as well.
+Although not directly comparable, the above estimations are in accordance with our global model. Moreover, the potential presence of endogeneity might be a problem here as well.
 Therefore, Table \ref{2sls.usa} reports 2SLS estimations.
 In addition to the strategy employed for the cross-country analysis -- that is the inclusion of one instrument for which we have strong reasons to believe is uncorrelated with the error term -- data availability allows to employ a second IV in order to estimate the Sargan over-identification restrictions test (Column 2).
-The main instrument we propose here is Bachelor’s degrees per inhabitant in $2005$.
+The main instrument we propose here is Bachelor’s degrees per inhabitant in $2005$^[
+\color{blue}
+Due to differences in scale, time and the endogenous variables, different IVs
+have been unutilized for the different sections of the paper.
+\color{black}].
 Even if the quality of human capital can affect the population growth of a city $10$ years later, our LHS variable adopts a systemic understanding of the US urban system as it measures the relative position of a city within the overall urban system instead of its population growth.
 In other words, a city might experience population growth between two periods, but if other cities have also experienced population growth, this might not affect its relative position within the urban system.
 Hence, we do not expect that this IV affects the LHS variable.
@@ -641,12 +736,12 @@ stargazer(model_iv1, model_iv2, type = "latex",
           summary = F,
           header = FALSE,
           no.space=TRUE,
-          column.separate = c(1,1,1,1),
+          #column.separate = c(1,1,1,1),
           title = "2SLS estimation of equation (4) for USA\\label{2sls.usa}",
           font.size = "small",
           column.sep.width = "-15pt",
           align = TRUE,
-          dep.var.labels=c("Normalized difference in ranks, 2013-18"),
+          dep.var.labels=c("Difference in ranks, 2013-18"),
           covariate.labels=c("\\% of households w. internet 2013",
                              "population 2013 (log)",
                              "\\% of unemployment 2013",
@@ -658,7 +753,8 @@ stargazer(model_iv1, model_iv2, type = "latex",
           single.row = FALSE, df = FALSE,
           omit.stat = c("rsq", "f"), notes = c("Robust Std. Errors in parenthesis",
                                                "IVs: (1) Bachelors degree per hab. in 2005",
-                                               "IVs: (2) Bachelors degree per hab. in 2005, Commute, minutes, 2005"),
+                                               "IVs: (2) Bachelors degree per hab. in 2005, Commute, minutes, 2005",
+                                               "First stage regressions can be found in S2"),
           add.lines = list(c(rownames(summ.fit1$diagnostics)[1],                    # use rownames as line name. in this case Weak insterumetns
                              round(summ.fit1$diagnostics[1, "statistic"], 2),
                              round(summ.fit2$diagnostics[1, "statistic"], 2)),
@@ -680,7 +776,10 @@ stargazer(model_iv1, model_iv2, type = "latex",
 
 In total, the estimates of Table \ref{2sls.usa} enable us to identify a causal effect of the share of households with internet connection on the position of a city in the urban system.
 Specifically, an increase in internet penetration led to an improvement of the position of a city in the US urban hierarchy for the cities and the time period included in our analysis.
-Everything else being equal, using the normalization formula for the $difference\:in\:ranks_{i}$, if a city whose position in the US urban system did not change during the period $2013-2018$ (that is $Normalized\:difference\:in\:ranks_{i} = 0.5$) had experienced an increase of 10 per cent points of internet penetration, this increase would have improved its relative position by $9$ places.
+\color{blue}
+Everything else being equal, if a city had experienced an increase of 10 per cent
+of internet penetration, this increase would have improved its relative position by $9$ places.
+\color{black}
 As in the global model reported in [Section 4](#sec4), internet penetration appears to work in favor of agglomeration externalities.
 In regards to the control variables, we can identify a negative effect of income, which is consistent with the effect of GDP per capita in the global model presented in Table \ref{2sls.global}.
 During the study period, unemployment rates and the share of white population negatively affected the ranking of micropolitan and metropolitan areas in the US as reflected in the relevant regressions.
@@ -710,12 +809,12 @@ rm(list=ls())
 load("C:/Users/nw19521/OneDrive - University of Bristol/projects/Ioannides/ict.un.us.uk/data/data_inter/UK.RData")
 
 data.for.decr <- data %>%
-  dplyr::select(r_diff_tr, download2011, pop2011, n.tests2011,  
+  dplyr::select(r_diff, download2011, pop2011, n.tests2011,  
          unemployment.share, british.pop.share, pop.dens,
          work.home.share, services.share, uni.freq) %>%
   mutate(n.tests2011perhab = n.tests2011/pop2011) %>%
   dplyr::select(-n.tests2011) %>%
-  dplyr::select(r_diff_tr, download2011, pop2011, n.tests2011perhab,  # re-redring
+  dplyr::select(r_diff, download2011, pop2011, n.tests2011perhab,  # re-redring
          unemployment.share, british.pop.share, pop.dens,
          work.home.share, services.share, uni.freq)
 
@@ -728,7 +827,7 @@ stargazer(as.data.frame(data.for.decr),
           title = "Descriptive statistics for the UK model\\label{desc.uk}",
           font.size = "small",
           single.row = FALSE,
-          covariate.labels=c("normalized difference in ranks, 2011-18",
+          covariate.labels=c("difference in ranks, 2011-18",
                              "download speed, 2011",
                              "population, 2011",
                              "broadband tests per capita, 2011",
@@ -776,13 +875,16 @@ stargazer(base, int_density, int_pop, base_glm,
           summary = F,
           header = FALSE,
           no.space=TRUE,
-          title = "OLS estimation of equation (4) for the UK\\label{ols.uk}",
+          title = "OLS and GLM estimations of equation (4) for the UK\\label{ols.uk}",
           font.size = "small",
-          dep.var.labels=c("Normalized difference in ranks, 2011-18"),
+          column.sep.width = "1pt",
+          #dep.var.labels=c("Difference in ranks, 2011-18"),
           #dep.var.caption = "Normalized difference in ranks, 2011-18",
-          column.labels = c("OLS", "GLM"),
-          column.separate = c(3,1),
-          model.names = FALSE,
+          #column.labels = c("OLS", "GLM"),
+          column.separate = 4, #c(3,1),
+          model.names = F,
+          dep.var.labels.include = F,
+          column.labels = "Difference in ranks, 2013-18",
           covariate.labels=c("download speed, 2011 (log)",
                              "population, 2011 (log)",  
                              "broadband tests per capita, 2011",
@@ -798,18 +900,42 @@ stargazer(base, int_density, int_pop, base_glm,
           single.row = FALSE,
           df = FALSE,
           omit.stat = c("rsq", "f"),
-          notes = "Robust Std. Errors")
+          notes = c("(1)-(3) is based on OLS, (4) on GLM",
+                    "For the GLM the Normalized diff. in ranks is used",
+                    "Robust std. errors in parenthesis"))
 ```
 
 
-In regards to IV strategy, we use here the number of universities as the main instrument.
+In regards to IV strategy, we use here the *number of universities* as the main instrument.
 Universities in England and Wales have been established long time ago and therefore we do not expect them to affect the change in the relative position of built-up areas in $2011$.
+\color{blue}
+The presence of universities and large student populations tend to be correlated
+with the quality of internet infrastructure provision [@GRUBESIC201950].
+\color{black}
 <!-- The correlation coefficient with the LHS variables is smaller than $0.05$. -->
 The addition of the second instrument (absolute number of broadband tests in 2011) in column $2$ results to a Sargan test, the null hypothesis of which cannot be rejected.
 Moreover, the estimations reported in Table 11 do not suffer from weak instruments as the relevant test is above the rule of thumb value of $10$.
-The coefficients derived from OLS (Table \ref{ols.uk}) and 2SLS (Table \ref{2sls.uk}) are of the same magnitude and always positive and significant, something which advocates towards the effect of broadband speed in enhancing agglomeration forces.
-A back of the envelope calculation indicates that, everything else being equal, $1$ per cent increase in download speed for a BUA, the relative position of which did not change during the period $2011-2014$, would have increased its position by $0.3$ places.
-In absolute numbers, $1$ per cent increase for the average BUA would mean a marginal change from $13.8$ Mbps to $13.9$ Mbps.
+\color{blue}
+The coefficients derived from OLS (Table \ref{ols.uk}) and 2SLS (Table \ref{2sls.uk}) are always positive and significant, something which advocates towards the effect of broadband speed in enhancing agglomeration forces.
+Interestingly, the magnitude of the 2SLS coefficient (column 1 in Table \ref{2sls.uk})
+is almost 8 times higher than the OLS coefficient (column 1 in Table \ref{ols.uk}).
+We attribute the OLS underestimation, which is more or less consistent in all
+our estimations, to the difficulty in directly observing active engagement with
+ICT. Our endogenous variable captures the quality of the internet infrastructure
+as the experienced internet speed.
+Similarly to the endogenous variables of the global and the US model (internet
+and telephony take-up), what these variables do not capture is what individuals
+actually do with ICT [see @tranos2020digital for such an application]. For example, if we assume a bi-modal internet usage for
+either entertainment or work purposes, one would expect  that the latter would
+have a larger effect on spatial structure than the former. We believe that our
+endogenous variables capture mostly the former. Therefore, the IV estimations,
+especially for UK case, reveal the local average treatment effect
+[@angrist1995identification] by capturing the effect of these users/households
+who actively engage with ICT (e.g. work on ICT-related sectors) and, therefore, have a higher effect on spatial structure.
+A back of the envelope calculation indicates that, everything else being equal,
+$10$ per cent increase in download speed for a BUA,
+would have increased its position by $4$ places.
+\color{black}
 
 ```{r, echo=FALSE, warning=FALSE, results='asis'}
 
@@ -830,7 +956,7 @@ stargazer(model_iv1, model_iv2,
           title = "2SLS estimation of equation (4) for the UK\\label{2sls.uk}",
           font.size = "small",
           se = list(rob.model_iv1[,"Std. Error"], rob.model_iv2[,"Std. Error"]),
-          dep.var.labels=c("Normalized difference in ranks, 2011-18"),
+          dep.var.labels=c("Difference in ranks, 2011-18"),
           covariate.labels=c("download speed, 2011 (log)",
                              "population, 2011 (log)",  
                              "broadband tests per capita, 2011",
@@ -841,8 +967,9 @@ stargazer(model_iv1, model_iv2,
                              "employment in service, 2011 (\\%)"),
           single.row = FALSE,
           df = FALSE,
-          omit.stat = c("rsq", "f"), notes = c("Robust Std. Errors", "IVs: (1) N.r of universities",
-                                               "IVs: (2) N. of universities, N. of broadband tests, 2011"),
+          omit.stat = c("rsq", "f"), notes = c("Robust std. errors in parenthesis", "IVs: (1) N.r of universities",
+                                               "IVs: (2) N. of universities, N. of broadband tests, 2011",
+                                               "First stage regressions can be found in S2"),
           add.lines = list(c(rownames(summ.fit1$diagnostics)[1],                    # use rownames as line name. in this case Weak insterumetns
                              round(summ.fit1$diagnostics[1, "statistic"], 2),
                              round(summ.fit2$diagnostics[1, "statistic"], 2)),
@@ -875,7 +1002,7 @@ The present study revisits Ioannides et al. [@ioannides2008effect] with a comple
 It examines the robustness of the findings of Tranos and Ioannides [@tranos2020ict] by employing alternative data sets.
 In general, quite a few earlier studies have either been based on assumptions about technological capabilities that might no longer hold today, or use data that do not fully capture  the widespread adoption and maturity of communication technologies that has taken place  since the data coverage of those earlier studies.
 
-We report estimation results using international country-level data on urban agglomerations with more than $300,000$ inhabitants from the UN Urban Settlements data and test the effect of ICT adoption on the Zipf, or Pareto, coefficients for national city size distributions, as measures of dispersion for heavy-tailed data. We report results which are robust to endogeneity concerns.
+We report estimation results using international country-level data on urban agglomerations with more than $300,000$ inhabitants from the UN Urban Settlements data and test the effect of ICT adoption on the Pareto exponents for national city size distributions, as measures of dispersion for heavy-tailed data. We report results which are robust to endogeneity concerns.
 Then, in order to examine such effects for cities that are smaller than those included in our international data, we focus on the US and the UK urban systems.
 Specifically, we test the effect of internet usage and internet speed on the changes over time in rankings of Micropolitan  and Metropolitan Areas in the US, and of Built Up Areas in the UK.
 The results favor a complementary relation between the internet and agglomeration externalities.

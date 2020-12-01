@@ -523,7 +523,7 @@ This leads to a decrease in the number of observations include in the regression
 
 ```{r}
 
-base <- lm(r_diff_tr ~ log(download2011) + log(pop2011) + I(n.tests2011/pop2011) + unemployment.share + 
+base <- lm(r_diff ~ log(download2011) + log(pop2011) + I(n.tests2011/pop2011) + unemployment.share + 
                      british.pop.share +  pop.dens + work.home.share + services.share, data = data, subset = n.tests2011>20)
 #nobs(base)
 
@@ -548,16 +548,16 @@ base_glm <- glm(r_diff_tr ~ log(download2011) + log(pop2011) + I(n.tests2011/pop
 #nobs(base_poisson)
 
 # interactions
-int_density <- lm(r_diff_tr ~ log(download2011)*pop.dens + log(pop2011) + I(n.tests2011/pop2011) + unemployment.share + 
+int_density <- lm(r_diff ~ log(download2011)*pop.dens + log(pop2011) + I(n.tests2011/pop2011) + unemployment.share + 
                      british.pop.share +  pop.dens + work.home.share + services.share, data = data, subset = n.tests2011>20)
 #nobs(int_density)
 
-int_pop <- lm(r_diff_tr ~ log(download2011)*log(pop2011) + log(pop2011) + I(n.tests2011/pop2011) + unemployment.share + 
+int_pop <- lm(r_diff ~ log(download2011)*log(pop2011) + log(pop2011) + I(n.tests2011/pop2011) + unemployment.share + 
                      british.pop.share +  pop.dens + work.home.share + services.share, data = data, subset = n.tests2011>20)
 #nobs(int_pop)
 
 # 2 SLS with IV
-model_iv1 <- ivreg(r_diff_tr ~ log(download2011) + log(pop2011) + I(n.tests2011/pop2011) + unemployment.share + 
+model_iv1 <- ivreg(r_diff ~ log(download2011) + log(pop2011) + I(n.tests2011/pop2011) + unemployment.share + 
                      british.pop.share +  pop.dens + work.home.share + services.share 
                    | log(pop2011) + I(n.tests2011/pop2011) + unemployment.share + 
                      british.pop.share +  pop.dens + work.home.share + services.share + uni.freq
@@ -565,7 +565,7 @@ model_iv1 <- ivreg(r_diff_tr ~ log(download2011) + log(pop2011) + I(n.tests2011/
 #summary(model_iv1, vcov = sandwich, diagnostics = TRUE)
 #nobs(base)
 
-model_iv2 <- ivreg(r_diff_tr ~ log(download2011) + log(pop2011) + I(n.tests2011/pop2011) + unemployment.share + 
+model_iv2 <- ivreg(r_diff ~ log(download2011) + log(pop2011) + I(n.tests2011/pop2011) + unemployment.share + 
                      british.pop.share +  pop.dens + work.home.share + services.share 
                    | log(pop2011) + I(n.tests2011/pop2011) + unemployment.share + 
                      british.pop.share +  pop.dens + work.home.share + services.share + uni.freq + n.tests2011
@@ -578,19 +578,21 @@ model_iv2 <- ivreg(r_diff_tr ~ log(download2011) + log(pop2011) + I(n.tests2011/
 ```{r}
 # Table 9
 data.for.decr <- data %>%
-  dplyr::select(r_diff_tr, download2011, pop2011, n.tests2011,  
+  dplyr::select(r_diff, download2011, pop2011, n.tests2011,  
          unemployment.share, british.pop.share, pop.dens, 
          work.home.share, services.share, uni.freq) %>%
   mutate(n.tests2011perhab = n.tests2011/pop2011) %>%
   dplyr::select(-n.tests2011) %>%
-  dplyr::select(r_diff_tr, download2011, pop2011, n.tests2011perhab,  # re-redring
+  dplyr::select(r_diff, download2011, pop2011, n.tests2011perhab,  # re-redring
          unemployment.share, british.pop.share, pop.dens, 
          work.home.share, services.share, uni.freq) 
 
-path.out <- paste(path, "/outputs/table9.htm", sep = "")
+#path.out <- paste(path, "/outputs/table9.htm", sep = "")
 
-stargazer(as.data.frame(data.for.decr), out=path.out, type="html", summary = T,
-          covariate.labels=c("normalized difference in ranks, 2011-14", "download speed, 2011", "population, 2011",  
+stargazer(as.data.frame(data.for.decr), 
+          #out=path.out, 
+          type="text", summary = T,
+          covariate.labels=c("difference in ranks, 2011-14", "download speed, 2011", "population, 2011",  
                              "broadband tests per capita, 2011", "% of unemployment, 2011", "% of British population, 2011", 
                              "population density, 2011", "% of people working from home, 2011",
                              "employment in service, 2011 (%)", "Number of universities"))
@@ -602,11 +604,12 @@ rob.int_density <- coeftest(int_density, function(x) vcovHC(x, type="HC0"))
 rob.int_pop <- coeftest(int_pop, function(x) vcovHC(x, type="HC0"))
 rob.base_glm <- coeftest(base_glm, function(x) vcovHC(x, type="HC0"))
 
-path.out <- paste(path, "/outputs/table10.htm", sep = "")
+# path.out <- paste(path, "/outputs/table10.htm", sep = "")
 
-stargazer(base, int_density, int_pop, base_glm, type="html",
+stargazer(base, int_density, int_pop, base_glm, 
+          type="text",
           se = list(rob.base[,"Std. Error"], rob.int_density[,"Std. Error"], rob.int_pop[,"Std. Error"], rob.base_glm[, "Std. Error"]), 
-          dep.var.labels=c("Normalized difference in ranks, 2011-18"),
+          dep.var.labels=c("Difference in ranks, 2011-18"),
           #dep.var.caption = "Normalized difference in ranks, 2011-18",
           column.labels = c("OLS", "GLM"),
           column.separate = c(3,1),
@@ -615,8 +618,10 @@ stargazer(base, int_density, int_pop, base_glm, type="html",
                              "population density, 2011", "% of people working from home, 2011",
                              "employment in service, 2011 (%)", "download speed, 2011 (log) x pop. density, 2011", 
                              "download speed, 2011 (log) x population, 2011 (log)"), 
-          out=path.out, single.row = FALSE, df = FALSE, omit.stat = c("rsq", "f"), 
-          notes = "Robust Std. Error parenthesis")
+          #out=path.out, 
+          single.row = FALSE, df = FALSE, omit.stat = c("rsq", "f"), 
+          notes = c("Robust Std. Error parenthesis",
+                    "For the GLM the Normalized diff. in ranks is used"))
 
 
 # Table 11
@@ -627,16 +632,18 @@ rob.model_iv2 <- coeftest(model_iv2, function(x) vcovHC(x, type="HC0"))
 summ.fit1 <- summary(model_iv1, vcov. = function(x) vcovHC(x, type="HC0"), diagnostics=T)
 summ.fit2 <- summary(model_iv2, vcov. = function(x) vcovHC(x, type="HC0"), diagnostics=T)
 
-path.out <- paste(path, "/outputs/table11.htm", sep = "")
+# path.out <- paste(path, "/outputs/table11.htm", sep = "")
 
-stargazer(model_iv1, model_iv2, type = "html", 
+stargazer(model_iv1, model_iv2, 
+          type = "text", 
           se = list(rob.model_iv1[,"Std. Error"], rob.model_iv2[,"Std. Error"]), 
-          dep.var.labels=c("Normalized difference in ranks, 2011-18"),
+          dep.var.labels=c("Difference in ranks, 2011-18"),
           covariate.labels=c("download speed, 2011 (log)", "population, 2011 (log)",  
                              "broadband tests per capita, 2011", "% of unemployment, 2011", "% of British population, 2011", 
                              "population density, 2011", "% of people working from home, 2011",
                              "employment in service, 2011 (%)"),
-          out=path.out, single.row = FALSE, df = FALSE, 
+          #out=path.out, 
+          single.row = FALSE, df = FALSE, 
           omit.stat = c("rsq", "f"), notes = c("Robust Std. Error in parenthesis", "IVs: (1) Number of universities",
                                                "IVs: (2) Number of universities, Number of broadband tests, 2011"),
           add.lines = list(c(rownames(summ.fit1$diagnostics)[1],                    # use rownames as line name. in this case Weak insterumetns

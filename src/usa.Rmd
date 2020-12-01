@@ -449,7 +449,7 @@ data <- data %>%
 ## descriptives
 
 ```{r}
-ggplot(data = data, aes(x=hh.net.share, y=r_diff_tr)) + geom_point() + geom_smooth(method = "lm")
+ggplot(data = data, aes(x=hh.net.share, y=r_diff)) + geom_point() + geom_smooth(method = "lm")
 ```
 
 ## Regressions
@@ -459,7 +459,7 @@ ggplot(data = data, aes(x=hh.net.share, y=r_diff_tr)) + geom_point() + geom_smoo
 #summary(base <- lm(r_diff_tr ~ I(computer.bb.15/total.bb.15) + log(pop.13) + un.13 + I(white.13/total.race.13) +
 #                     log(income.13) + I(pop.13/area) + service.13 + travel.to.work.m.13, data = df.num)) # OK
 
-summary(base <- lm(r_diff_tr ~ hh.net.share + log(pop2013) + un13 + white2013share +
+summary(base <- lm(r_diff ~ hh.net.share + log(pop2013) + un13 + white2013share +
                      log(income2013) + I(pop2013/area_h) + service2013 + commuting.minutes2013, data = data))
 
 #summary(base_glm <- glm(r_diff_tr ~ I(computer.bb.15/total.bb.15) + log(pop.13) + un.13 + I(white.13/total.race.13) +
@@ -484,13 +484,13 @@ summary(base_poisson <- glm(r_diff_tr ~ hh.net.share + log(pop2013) + un13 + whi
 #summary(int_density <- lm(r_diff_tr ~ I(computer.bb.15/total.bb.15)*I(pop.13/area) + log(pop.13) + un.13 + I(white.13/total.race.13) +
 #                     log(income.13) + I(pop.13/area) + service.13 + travel.to.work.m.13, data = df.num)) # OK
 
-summary(int_density <- lm(r_diff_tr ~ hh.net.share*I(pop2013/area_h) + log(pop2013) + un13 + white2013share +
+summary(int_density <- lm(r_diff ~ hh.net.share*I(pop2013/area_h) + log(pop2013) + un13 + white2013share +
                      log(income2013) + I(pop2013/area_h) + service2013 + commuting.minutes2013, data = data))
 
 #summary(int_pop <- lm(r_diff_tr ~ I(computer.bb.15/total.bb.15)*log(pop.13) + log(pop.13) + un.13 + I(white.13/total.race.13) +
 #                     log(income.13) + I(pop.13/area) + service.13 + travel.to.work.m.13, data = df.num)) # no sig maybe because of larger cities
 
-summary(int_pop <- lm(r_diff_tr ~ hh.net.share*log(pop2013) + log(pop2013) + un13 + white2013share +
+summary(int_pop <- lm(r_diff ~ hh.net.share*log(pop2013) + log(pop2013) + un13 + white2013share +
                      log(income2013) + I(pop2013/area_h) + service2013 + commuting.minutes2013, data = data))
 
 
@@ -502,7 +502,7 @@ summary(int_pop <- lm(r_diff_tr ~ hh.net.share*log(pop2013) + log(pop2013) + un1
 #                             + bachelors.05 , data = df.num))
 #summary(model_iv1, vcov = sandwich, diagnostics = TRUE)
 
-summary(model_iv1 <- ivreg(r_diff_tr ~ hh.net.share + log(pop2013) + un13 + white2013share +
+summary(model_iv1 <- ivreg(r_diff ~ hh.net.share + log(pop2013) + un13 + white2013share +
                      log(income2013) + I(pop2013/area_h) + service2013 + commuting.minutes2013 |
                        log(pop2013) + un13 + white2013share +
                        log(income2013) + I(pop2013/area_h) + service2013 + commuting.minutes2013 +
@@ -517,7 +517,7 @@ summary(model_iv1, vcov = sandwich, diagnostics = TRUE)
 #                       + bachelors.05 + travel.to.work.m.05 , data = df.num))
 #summary(model_iv2, vcov = sandwich, diagnostics = TRUE)
 
-summary(model_iv2 <- ivreg(r_diff_tr ~ hh.net.share + log(pop2013) + un13 + white2013share +
+summary(model_iv2 <- ivreg(r_diff ~ hh.net.share + log(pop2013) + un13 + white2013share +
                      log(income2013) + I(pop2013/area_h) + service2013 + commuting.minutes2013 |
                        log(pop2013) + un13 + white2013share +
                        log(income2013) + I(pop2013/area_h) + service2013 + commuting.minutes2013 +
@@ -529,7 +529,7 @@ summary(model_iv2, vcov = sandwich, diagnostics = TRUE)
 ```{r}
 # Table 6
 data.for.decr <- data %>%
-  dplyr::select(r_diff_tr, hh.net.share, pop2013, un13,white2013share, 
+  dplyr::select(r_diff, hh.net.share, pop2013, un13,white2013share, 
                 income2013, area_h, service2013, commuting.minutes2013,
                 bachelors2005, commuting.minutes2005) %>%
   mutate(density = pop2013/area_h) %>%
@@ -539,7 +539,7 @@ data.for.decr <- data %>%
 path.out <- paste(path, "/outputs/table6.htm", sep = "")
 
 stargazer(as.data.frame(data.for.decr), out=path.out, type="html", summary = T,
-          covariate.labels=c("normalized difference in ranks, 2013-18", 
+          covariate.labels=c("difference in ranks, 2013-18", 
                              "households w. internet, 2013 (%)", 
                              "population, 2013",  
                              "% of unemployment, 2013", 
@@ -557,11 +557,12 @@ rob.int_density <- coeftest(int_density, function(x) vcovHC(x, type="HC0"))
 rob.int_pop <- coeftest(int_pop, function(x) vcovHC(x, type="HC0"))
 rob.base_glm <- coeftest(base_glm, function(x) vcovHC(x, type="HC0"))
 
-path.out <- paste(path, "/outputs/table7.htm", sep = "")
+#path.out <- paste(path, "/outputs/table7.htm", sep = "")
 
-stargazer(base, int_density, int_pop, base_glm, type="html",
+stargazer(base, int_density, int_pop, base_glm, 
+          type="text",
           se = list(rob.base[,"Std. Error"], rob.int_density[,"Std. Error"], rob.int_pop[,"Std. Error"], rob.base_glm[, "Std. Error"]), 
-          dep.var.labels=c("Normalized difference in ranks 2013-18"),
+          dep.var.labels=c("Difference in ranks 2013-18"),
           covariate.labels=c("households w. internet, 2013 (%)", 
                              "population, 2013",  
                              "% of unemployment, 2013", 
@@ -572,8 +573,11 @@ stargazer(base, int_density, int_pop, base_glm, type="html",
                              "commute in minutes, 2013", 
                              "households w. internet, 2013 (%) x pop. density, 2013", 
                              "households w. internet, 2013 (%) x population, 2013"), 
-          out=path.out, single.row = FALSE, df = FALSE, 
-          omit.stat = c("rsq", "f"), notes = "Robust Std. Error in parenthesis")
+          #out=path.out, 
+          single.row = FALSE, df = FALSE, 
+          omit.stat = c("rsq", "f"), 
+          notes = c("Robust Std. Error in parenthesis",
+                    "For the GLM the Normalized diff. in ranks is used"))
 
 # Table 8
 rob.model_iv1 <- coeftest(model_iv1, function(x) vcovHC(x, type="HC0"))
@@ -583,9 +587,10 @@ summ.fit2 <- summary(model_iv2, vcov. = function(x) vcovHC(x, type="HC0"), diagn
 
 path.out <- paste(path, "/outputs/table8.htm", sep = "")
 
-stargazer(model_iv1, model_iv2, type = "html", 
+stargazer(model_iv1, model_iv2, 
+          type = "text", 
           se = list(rob.model_iv1[,"Std. Error"], rob.model_iv2[,"Std. Error"]), 
-          dep.var.labels=c("Normalized difference in ranks, 2013-18"),
+          dep.var.labels=c("Difference in ranks, 2013-18"),
           covariate.labels=c("households w. internet, 2013 (%)", 
                              "population, 2013",  
                              "% of unemployment, 2013", 
@@ -594,7 +599,8 @@ stargazer(model_iv1, model_iv2, type = "html",
                              "population density, 2013", 
                              "employment in service, 2011 (%)", 
                              "commute in minutes, 2013"), 
-          out=path.out, single.row = FALSE, df = FALSE, 
+          #out=path.out, 
+          single.row = FALSE, df = FALSE, 
           omit.stat = c("rsq", "f"), notes = c("Robust Std. Error in parenthesis", 
                                                "IVs: (1) Bachelors degree per hab. in 2005",
                                                "IVs: (2) Bachelors degree per hab. in 2005, Commute, minutes, 2005"),

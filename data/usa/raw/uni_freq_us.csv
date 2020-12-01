@@ -6,7 +6,7 @@ GEOID,NAME,NAMELSAD,uni.freq
 10260,"Adjuntas, PR","Adjuntas, PR Micro Area",0
 10300,"Adrian, MI","Adrian, MI Micro Area",0
 10380,"Aguadilla-Isabela, PR","Aguadilla-Isabela, PR Metro Area",0
-10420,"Akron, OH","Akron, OH Metro Area",2
+10420,"Akron, OH","Akron, OH Metro Area",1
 10460,"Alamogordo, NM","Alamogordo, NM Micro Area",0
 10500,"Albany, GA","Albany, GA Metro Area",0
 10540,"Albany, OR","Albany, OR Metro Area",0
@@ -386,7 +386,7 @@ GEOID,NAME,NAMELSAD,uni.freq
 26460,"Hudson, NY","Hudson, NY Micro Area",0
 26500,"Huntingdon, PA","Huntingdon, PA Micro Area",0
 26540,"Huntington, IN","Huntington, IN Micro Area",0
-26580,"Huntington-Ashland, WV-KY-OH","Huntington-Ashland, WV-KY-OH Metro Area",2
+26580,"Huntington-Ashland, WV-KY-OH","Huntington-Ashland, WV-KY-OH Metro Area",1
 26620,"Huntsville, AL","Huntsville, AL Metro Area",1
 26660,"Huntsville, TX","Huntsville, TX Micro Area",0
 26700,"Huron, SD","Huron, SD Micro Area",0
@@ -744,7 +744,7 @@ GEOID,NAME,NAMELSAD,uni.freq
 41540,"Salisbury, MD-DE","Salisbury, MD-DE Metro Area",1
 41620,"Salt Lake City, UT","Salt Lake City, UT Metro Area",1
 41660,"San Angelo, TX","San Angelo, TX Metro Area",0
-41700,"San Antonio-New Braunfels, TX","San Antonio-New Braunfels, TX Metro Area",1
+41700,"San Antonio-New Braunfels, TX","San Antonio-New Braunfels, TX Metro Area",3
 41740,"San Diego-Carlsbad, CA","San Diego-Carlsbad, CA Metro Area",3
 41760,"Sandpoint, ID","Sandpoint, ID Micro Area",0
 41780,"Sandusky, OH","Sandusky, OH Micro Area",0
