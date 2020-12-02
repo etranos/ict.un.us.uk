@@ -129,14 +129,14 @@ Hence, it behooves us to return empirically to the impact on agglomeration exter
 
 \color{blue}
 Kolko [@kolko_death_2000] uses internet diffusion data and identifies a clear complementary link between internet usage and city size.
-Interestingly, he identifies higher internet domain densities in remote cities which indicated a substitution effect of the internet for longer-distance non-electronic communications. His results are consistent for different measures of internet diffusion (internet domain density and internet take-up).
+Interestingly, he identifies higher internet domain densities in remote cities which indicates a substitution effect of the internet for longer-distance non-electronic communications. His results are consistent for different measures of internet diffusion (internet domain density and internet take-up).
 Sinai and Waldfogel [@todd_sinai_geography_2004] approach the same question from the consumers’ point of view and find support for complementarity between internet and cities.
-They study the link between market size and locally targeted online content and find that more online local content in  larger markets.
-However, they also obtain evidence for a substitution effect: they find that holding constant local online content constant, market size has a negative effect on individual connectivity.
-Forman et al. [@chris_forman_how_2005] examined whether commercial internet adoption is higher in cities than in rural areas. While the former would indicate a complementarity between internet adoption and cities, the latter would reflect a complementary relation, according to which the internet is used as a means to offset costs and lack of opportunities related to peripheriality.
+They study the link between market size and locally targeted online content and find more online local content in  larger markets.
+However, they also obtain evidence for a substitution effect: holding local online content constant, market size has a negative effect on individual connectivity.
+Forman et al. [@chris_forman_how_2005] examines whether commercial internet adoption is higher in cities than in rural areas. While the former would indicate a complementarity between internet adoption and cities, the latter would reflect a substitutability relation, according to which the internet is used as a means to offset costs and lack of opportunities related to peripheriality.
 Their results indicate that despite internet adoption by firms with more than 100 employees being greater in smaller urban agglomerations, the adoption of more sophisticated internet-based applications is positively related with city size in $2000$.
 Sohn, Kim, and Hewings [@jungyul_sohn_information_2003] compare how information technologies are related to urban spatial structure for Chicago and Seoul.
-Although they find a clear complementary link for Chicago, this was not the case for Seoul, where information technologies contribute to a more dispersed spatial pattern.
+Although they find a clear complementary link for Chicago, this is not the case for Seoul, where information technologies contribute to a more dispersed spatial pattern.
 Focusing on the municipalities in the province of Barcelona, Pons-Novell and Viladecans-Marsal [@pons-novell_cities_2006] find a complementary link between individual internet take-up and off-line commercial offerings, but their results cannot safely reject a substitution effect.
 Craig, Hoang, and Kohlhase [@craig_does_2016] focus on internet take-up rates across US states during the period $2000-2011$.
 Their analysis provides suggestive evidence of a complementary role that internet connectivity performs on urban living.
@@ -179,13 +179,13 @@ This is notable because several years of additional data were used that pertain 
 \color{blue}
 The present paper does not address the issue that adoption of ICT may have
 different effects on urban dispersion on a national scale, that is how far are
-major areas, that is, cities, from one another, versus dispersion within major
+major urban areas, that is, cities, from one another, versus dispersion within major
 urban areas, that is urban sprawl. Such an inquiry would require detailed data
 about patterns of how urban sprawl may hamper or promote economic interaction,
 given advancements in information technology.
 We think that data from the Covid-19 pandemic would likely throw light at this
-issue, as it is clear that not all economic activities might continue in an
-unencumbered manner; see Dingel and Neiman [@dingel2020many].
+issue in the future, as it is clear that not all economic activities might
+continue in an unencumbered manner; see Dingel and Neiman [@dingel2020many].
 \color{black}
 
 # Materials and Methods {#sec3}
@@ -203,11 +203,11 @@ Because of limitations related with multi-country urban population data (see dis
 The multi-country identification strategy is a two-step approach [@ioannides2008effect].
 The first step of our methodology is to estimate the
 \color{blue}
-Pareto exponent coefficient
+Pareto exponent
 \color{black}
 for a broad sample of countries over time.
 \color{blue}
-The Pareto coefficient
+The Pareto exponent
 \color{black}
 is one of the most widely used measures of spatial dispersion with numerous applications in urban economics and economic geography ([see for example @black_urban_2003; @frenken_theoretical_2007; @giesen_zipfs_2011; @rauch_cities_2013; @ioannides_zipfs_2003; @ioannides_walled_2017; @nitsch_zipf_2005).
 This an appropriate measure of dispersion because of the extreme heterogeneity of the city size distribution and the very good fits normally obtained with such estimations^[
@@ -569,7 +569,7 @@ The exact opposite appears to happen for fixed telephony, which our results indi
 \color{blue}
 We expect that the IV estimates capture the local average treatment effect
 [@angrist1995identification] of these labour markets, which are characterised by
-more active engage with the internet, and, therefore, experience a larger effect
+more active engagement with the internet, and, therefore, experience a larger effect
 on the Pareto exponents.
 \color{black}
 Importantly, our identification strategy enables us to address potential reverse causality issues and treat the results of Table \ref{2sls.global} as causal. Hence, the main finding of our multi-country, global analysis based on data for urban agglomerations of at least 300,000 inhabitants is that internet and broadband internet usage appear to act in favor of agglomeration economies and result to urban systems with more dominant cities on the top of the urban hierarchy.
@@ -603,7 +603,7 @@ proximity in  social interactions.
 The former supports the notion people who communicate more frequently are likely
 to be near one another.
 ICT, as viewed through such granular studies of individuals' communications
-does not make up for physical distance; individuals nearer one another
+do not make up for physical distance; individuals nearer one another
 communicate more.  
 \color{black}
 
@@ -661,8 +661,8 @@ two count variables, which may also assume negative values.
 The results of the different estimations remain qualitatively the same regardless of the form of the LHS variable we use.
 Table \ref{ols.usa} reports the results of the estimation of equation \ref{eq4} using OLS.
 The sign and significance of the main variable of interest -- percentage of population with computer and broadband connection -- verifies our global level results.
-That is an increase in internet usage improves the position of a city in the US urban system.
-The results are consistent among the different estimators that are OLS and GLM.
+That is, an increase in internet usage improves the position of a city in the US urban system.
+The results are consistent among the different estimators that is OLS and GLM.
 In addition, Table \ref{ols.usa} also reports the estimates of interaction effects between the share of population with broadband connection with population and population density.
 Although the interaction terms are not significant, the main effect remains qualitatively unchanged.
 
@@ -710,17 +710,17 @@ stargazer(base, int_density, int_pop, base_glm, type="latex",
 
 Although not directly comparable, the above estimations are in accordance with our global model. Moreover, the potential presence of endogeneity might be a problem here as well.
 Therefore, Table \ref{2sls.usa} reports 2SLS estimations.
-In addition to the strategy employed for the cross-country analysis -- that is the inclusion of one instrument for which we have strong reasons to believe is uncorrelated with the error term -- data availability allows to employ a second IV in order to estimate the Sargan over-identification restrictions test (Column 2).
+In addition to the strategy employed for the cross-country analysis -- that is the inclusion of one instrument for which we have strong reasons to believe is uncorrelated with the error term -- data availability allows us to employ a second IV in order to estimate the Sargan over-identification restrictions test (Column 2).
 The main instrument we propose here is Bachelor’s degrees per inhabitant in $2005$^[
 \color{blue}
 Due to differences in scale, time and the endogenous variables, different IVs
 have been unutilized for the different sections of the paper.
 \color{black}].
-Even if the quality of human capital can affect the population growth of a city $10$ years later, our LHS variable adopts a systemic understanding of the US urban system as it measures the relative position of a city within the overall urban system instead of its population growth.
+Even if the quality of human capital affect the population growth of a city $10$ years later, our LHS variable adopts a systemic understanding of the US urban system as it measures the relative position of a city within the overall urban system instead of its population growth.
 In other words, a city might experience population growth between two periods, but if other cities have also experienced population growth, this might not affect its relative position within the urban system.
 Hence, we do not expect that this IV affects the LHS variable.
 <!-- In addition, the correlation coefficient between these two variables is still very low ($r=0.24$). -->
-Moreover, when we add the second IV, which in this case is the commute time in minutes also in $2005$, we fail to reject the null hypothesis of the Sargan test, something which also adds on the validity of our strategy.
+Moreover, when we add the second IV, which in this case is the commute time in minutes also in $2005$, we fail to reject the null hypothesis of the Sargan test, something which also adds the validity of our strategy.
 Furthermore, our results do not suffer from weak identification according to the relevant tests in Table \ref{2sls.usa}.
 
 ```{r, echo=FALSE, warning=FALSE, results='asis'}
@@ -916,7 +916,7 @@ with the quality of internet infrastructure provision [@GRUBESIC201950].
 The addition of the second instrument (absolute number of broadband tests in 2011) in column $2$ results to a Sargan test, the null hypothesis of which cannot be rejected.
 Moreover, the estimations reported in Table 11 do not suffer from weak instruments as the relevant test is above the rule of thumb value of $10$.
 \color{blue}
-The coefficients derived from OLS (Table \ref{ols.uk}) and 2SLS (Table \ref{2sls.uk}) are always positive and significant, something which advocates towards the effect of broadband speed in enhancing agglomeration forces.
+The coefficients derived from OLS (Table \ref{ols.uk}) and 2SLS (Table \ref{2sls.uk}) are always positive and significant, something which advocates in favour of the effect of broadband speed in enhancing agglomeration forces.
 Interestingly, the magnitude of the 2SLS coefficient (column 1 in Table \ref{2sls.uk})
 is almost 8 times higher than the OLS coefficient (column 1 in Table \ref{ols.uk}).
 We attribute the OLS underestimation, which is more or less consistent in all
