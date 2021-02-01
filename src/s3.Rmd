@@ -1,0 +1,256 @@
+---
+title: "S3 Appendix"
+author: ""
+output: pdf_document
+header-includes:
+- \usepackage{multirow}
+knit: (function(inputFile, encoding) {
+    rmarkdown::render(inputFile, encoding = encoding, output_dir = "../paper/2_final_submission")
+  })
+---
+
+```{r, echo=FALSE, warning=FALSE, results='hide', message=FALSE}
+library(rmarkdown)
+library(tidyverse)
+library(car)
+library(lmtest)
+library(plm)
+library(stargazer)
+library(knitr)
+library(rprojroot)
+
+# load data
+path <- find_rstudio_root_file()
+path.un <- paste0(path, "/data/data_inter/data_for_un_regressions.csv")
+path.us <- paste0(path, "/data/data_inter/data_for_usa_regressions.csv")
+path.uk <- paste0(path, "/data/data_inter/data_for_uk_regressions.csv")
+
+un <- read_csv(path.un)
+us <- read_csv(path.us)
+uk <- read_csv(path.uk)
+```
+
+# First stage regressions for the 2SLS estimations
+
+## Global model
+
+```{r, echo=FALSE, warning=FALSE, results='asis', message=FALSE}
+
+net.2sls.s1 <- lm(net100hab ~  fem.lab + log(pop.dens)  + gov.exp + trade + non.agri + gdp.growth + log(gdppc) +  log(pop) 
+                      + as.factor(year) + as.factor(country), 
+               data = un, weights = 1/(se^2))
+
+bb.2sls.s1 <- lm(bb100hab ~ fem.lab + log(pop.dens)  + gov.exp + trade + non.agri + gdp.growth + log(gdppc) +  log(pop) 
+                      + as.factor(year) + as.factor(country), 
+               data = un, weights = 1/(se^2))
+
+fixed.2sls.s1 <- lm(fixed100hab ~ fem.lab + log(pop.dens) + gov.exp + trade + non.agri + gdp.growth + log(gdppc) +  log(pop) 
+                      + as.factor(year) + as.factor(country), 
+               data = un, weights = 1/(se^2))
+
+mobile.2sls.s1 <- lm(mobile100hab ~ fem.lab + log(pop.dens)  + gov.exp + trade + non.agri + gdp.growth + log(gdppc) +  log(pop) 
+                      + as.factor(year) + as.factor(country), 
+               data = un, weights = 1/(se^2))
+
+net.2sls.s1.rse <- coeftest(net.2sls.s1, function(x) vcovHC(x, type="HC0"))
+
+bb.2sls.s1.rse <- coeftest(bb.2sls.s1, function(x) vcovHC(x, type="HC0"))
+
+fixed.2sls.s1.rse <- coeftest(fixed.2sls.s1, function(x) vcovHC(x, type="HC0"))
+
+mobile.2sls.s1.rse <- coeftest(mobile.2sls.s1, function(x) vcovHC(x, type="HC0"))
+
+stargazer(net.2sls.s1, bb.2sls.s1, fixed.2sls.s1, mobile.2sls.s1, type = "latex",
+          se = list(net.2sls.s1.rse[,"Std. Error"], bb.2sls.s1.rse[,"Std. Error"],
+                    fixed.2sls.s1.rse[,"Std. Error"], mobile.2sls.s1.rse[,"Std. Error"]),
+          header = FALSE,
+          no.space=TRUE,
+          title = "First stage regressions for Table 5 \\label{2sls.global.s1}",
+          font.size = "footnotesize",
+          column.sep.width = "1pt",
+          # dep.var.labels=c("Internet users per 100 hab. (log)",
+          #                 "Broadband users per 100 hab. (log)",
+          #                 "Mobile phone users per 100 hab. (log)",
+          #                 "Fixed phone users per 100 hab. (log)"),
+          column.labels=c('Internet users',
+                           "Broadband users",
+                           "Mobile phone users",
+                           "Fixed phone users"),
+          dep.var.labels.include = FALSE,
+          #column.separate = c(1,1,1,1),
+          covariate.labels=c("Female labour force (\\%)",
+                             "Population density (log)",
+                             "Government expenditure (\\% GDP)",
+                             "Trade (\\% of GDP)",
+                             "Non agriculture value added (\\% GDP)",
+                             "GDP growth",
+                             "GDP per capita (log)",
+                             "Population (log)"),
+          single.row = FALSE, df = FALSE,
+          omit = c("country", "year"),
+          omit.stat = c("rsq", "f"),
+          add.lines = list(
+            # c(rownames(summ.net.2sls$diagnostics)[1], # use rownames as line name. in this case Weak insterumetns
+            #                  round(summ.net.2sls$diagnostics[1, "statistic"], 2),
+            #                  round(summ.bb.2sls$diagnostics[1, "statistic"], 2),
+            #                  round(summ.fixed.2sls$diagnostics[1, "statistic"], 2),
+            #                  round(summ.mobile.2sls$diagnostics[1, "statistic"], 2)),
+            #                c(rownames(summ.net.2sls$diagnostics)[2],
+            #                  round(summ.net.2sls$diagnostics[2, "statistic"], 2),
+            #                  round(summ.bb.2sls$diagnostics[2, "statistic"], 2),
+            #                  round(summ.fixed.2sls$diagnostics[2, "statistic"], 2),
+            #                  round(summ.mobile.2sls$diagnostics[2, "statistic"], 2)),
+            #                c("P-value",
+            #                  round(summ.net.2sls$diagnostics[2, "p-value"], 2),
+            #                  round(summ.bb.2sls$diagnostics[2, "p-value"], 2),
+            #                  round(summ.fixed.2sls$diagnostics[2, "p-value"], 2),
+            #                  round(summ.mobile.2sls$diagnostics[2, "p-value"], 2)),
+                           # c(rownames(summ.net.2sls$diagnostics)[3],
+                           #   round(summ.net.2sls$diagnostics[3, "statistic"], 2),
+                           #   round(summ.bb.2sls$diagnostics[3, "statistic"], 2),
+                           #   round(summ.fixed.2sls$diagnostics[3, "statistic"], 2),
+                           #   round(summ.mobile.2sls$diagnostics[3, "statistic"], 2)),
+                           # c("P-value",
+                           #   round(summ.net.2sls$diagnostics[3, "p-value"], 2),
+                           #   round(summ.bb.2sls$diagnostics[3, "p-value"], 2),
+                           #   round(summ.fixed.2sls$diagnostics[3, "p-value"], 2),
+                           #   round(summ.mobile.2sls$diagnostics[3, "p-value"], 2)),
+                           c("Country fixed effects", "Yes", "Yes", "Yes", "Yes"),
+                           c("Yearly fixed effects", "Yes", "Yes", "Yes", "Yes")),
+          notes = c("Robust Std. Errors in parenthesis"))
+
+net.test <- car::linearHypothesis(net.2sls.s1, c("fem.lab=0"))
+bb.test <- car::linearHypothesis(bb.2sls.s1, c("fem.lab=0"))
+mob.test <- car::linearHypothesis(fixed.2sls.s1, c("fem.lab=0"))
+fixed.test <- car::linearHypothesis(mobile.2sls.s1, c("fem.lab=0"))
+
+tests <- data.frame("F" = c(net.test$F[2], bb.test$F[2], mob.test$F[2], fixed.test$F[2]),
+                    "p" = c(net.test$`Pr(>F)`[2], bb.test$`Pr(>F)`[2], mob.test$`Pr(>F)`[2], fixed.test$`Pr(>F)`[2]),
+                    row.names = c("internet users", "broadband users", "mobile phone users", "fixed telephony users"))
+
+stargazer(tests, 
+          summary = F, 
+          type = "latex",
+          digits = 3,
+          title = "F tests for IV (female labour force (\\%)) from first stage regressions for Table 5 \\label{2sls.global.s1.f}",
+          header = FALSE
+)
+```
+
+\newpage
+
+## US model
+
+```{r, echo=FALSE, warning=FALSE, results='asis', message=FALSE}
+
+model_iv1.s1 <- lm(hh.net.share ~ bachelors2005 + 
+                     log(pop2013) + un13 + white2013share + 
+                     log(income2013) + I(pop2013/area_h) + service2013 + commuting.minutes2013, 
+                   data = us)
+
+model_iv2.s1 <- lm(hh.net.share ~ bachelors2005 + commuting.minutes2005 + 
+                     log(pop2013) + un13 + white2013share + 
+                     log(income2013) + I(pop2013/area_h) + service2013 + commuting.minutes2013, 
+                   data = us)
+
+rob.model_iv1.s1 <- coeftest(model_iv1.s1, function(x) vcovHC(x, type="HC0")) # rob = rse, naming inconsistency
+rob.model_iv2.s1 <- coeftest(model_iv1.s1, function(x) vcovHC(x, type="HC0"))
+
+stargazer(model_iv1.s1, model_iv2.s1, 
+          type = "latex",
+          title = "First stage regressions for Table 8 \\label{2sls.us.s1}",
+          header = FALSE,
+          se = list(rob.model_iv1.s1[,"Std. Error"], rob.model_iv2.s1[,"Std. Error"]), 
+          dep.var.labels=c("\\% of households w. internet 2013"),
+          covariate.labels=c("bachelors degree per hab. 2005",
+                             "commute in minutes 2005",
+                             "population 2013 (log)",
+                             "\\% of unemployment 2013",
+                             "\\% of white population 2013",
+                             "income 2013 (log)",
+                             "population density 2013",
+                             "\\% of employment in service 2011",
+                             "commute in minutes 2012"),
+          single.row = FALSE,
+          df = FALSE, 
+          omit.stat = c("rsq", "f"), 
+          notes = c("Robust Std. Error in parenthesis"))
+
+model_iv1.s1.test <- car::linearHypothesis(model_iv1.s1, c("bachelors2005=0"))
+model_iv2.s1.test <- car::linearHypothesis(model_iv2.s1, c("bachelors2005=0","commuting.minutes2005=0"))
+
+tests <- data.frame("F" = c(model_iv1.s1.test$F[2], model_iv2.s1.test$F[2]),
+                    "p" = c(model_iv1.s1.test$`Pr(>F)`[2], model_iv2.s1.test$`Pr(>F)`[2]),
+                    row.names = c("bachelors degree per hab., 2005", "the above + commute in minutes, 2005"))
+
+stargazer(tests, 
+          summary = F, 
+          type = "latex",
+          digits = 3,
+          title = "F tests for IVs from first stage regressions for Table 8 \\label{2sls.us.s1.f}",
+          header = FALSE
+)
+```
+
+\newpage
+
+## UK model
+
+```{r, echo=FALSE, warning=FALSE, results='asis', message=FALSE}
+
+model_iv1.s1 <- lm(log(download2011) ~ uni.freq +
+                     log(pop2011) + I(n.tests2011/pop2011) + unemployment.share + 
+                     british.pop.share +  pop.dens + work.home.share + services.share
+                     , data = uk, subset = n.tests2011>30)
+
+model_iv2.s1 <- lm(log(download2011) ~ uni.freq + n.tests2011 +
+                     log(pop2011) + I(n.tests2011/pop2011) + unemployment.share + 
+                     british.pop.share +  pop.dens + work.home.share + services.share
+                     , data = uk, subset = n.tests2011>30)
+
+rob.model_iv1.s1 <- coeftest(model_iv1.s1, function(x) vcovHC(x, type="HC0"))
+rob.model_iv2.s1 <- coeftest(model_iv2.s1, function(x) vcovHC(x, type="HC0"))
+
+stargazer(model_iv1.s1, model_iv2.s1,
+          type="latex",
+          summary = F,
+          header = FALSE,
+          no.space=TRUE,
+          title = "First stage regressions for Table 11 \\label{2sls.us.s1}",
+          font.size = "small",
+          se = list(rob.model_iv1.s1[,"Std. Error"], rob.model_iv2.s1[,"Std. Error"]),
+          dep.var.labels=c("download speed, 2011 (log)"),
+          covariate.labels=c("N. of universities",
+                             "N. of broadband tests, 2011",
+                             "population, 2011 (log)",  
+                             "broadband tests per capita, 2011",
+                             "\\% of unemployment, 2011",
+                             "\\% of British population, 2011",
+                             "population density, 2011",
+                             "\\% of people working from home, 2011",
+                             "employment in service, 2011 (\\%)"),
+          single.row = FALSE,
+          df = FALSE,
+          omit.stat = c("rsq", "f"), 
+          notes = c("Robust Std. Errors"))
+          
+          
+# N. of universities",
+# N. of universities, N. of broadband tests, 2011"),
+
+model_iv1.s1.test <- car::linearHypothesis(model_iv1.s1, c("uni.freq=0"))
+model_iv2.s1.test <- car::linearHypothesis(model_iv2.s1, c("uni.freq=0", "n.tests2011=0"))
+
+tests <- data.frame("F" = c(model_iv1.s1.test$F[2], model_iv2.s1.test$F[2]),
+                    "p" = c(model_iv1.s1.test$`Pr(>F)`[2], model_iv2.s1.test$`Pr(>F)`[2]),
+                    row.names = c("N. of universities", "the above + N. of broadband tests, 2011"))
+
+stargazer(tests, 
+          summary = F, 
+          type = "latex",
+          digits = 3,
+          title = "F tests for IVs from first stage regressions for Table 8 \\label{2sls.us.s1.f}",
+          header = FALSE
+)
+
+```

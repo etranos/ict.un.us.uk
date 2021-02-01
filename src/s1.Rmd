@@ -3,7 +3,7 @@ title: "S1 Appendix"
 author: ""
 output: pdf_document
 knit: (function(inputFile, encoding) {
-    rmarkdown::render(inputFile, encoding = encoding, output_dir = "../paper/2_resubmission")
+    rmarkdown::render(inputFile, encoding = encoding, output_dir = "../paper/2_final_submission")
   })
 ---
 
@@ -59,9 +59,13 @@ library(kableExtra)
 library(REAT)
 
 # This is the project path
-# path <- find_rstudio_root_file()
+path <- find_rstudio_root_file()
 
-load("C:/Users/nw19521/OneDrive - University of Bristol/projects/Ioannides/ict.un.us.uk/data/data_inter/UN.RData")
+# load data
+path <- find_rstudio_root_file()
+path.un <- paste0(path, "/data/data_inter/UN.RData")
+
+load(path.un)
 ```
 
 ```{r, echo=FALSE, warning=FALSE, results='hide', message=FALSE}

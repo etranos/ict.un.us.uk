@@ -1,249 +1,126 @@
 ---
 title: "S2 Appendix"
 author: ""
-output: pdf_document
+output: html_document
 header-includes:
 - \usepackage{multirow}
 knit: (function(inputFile, encoding) {
-    rmarkdown::render(inputFile, encoding = encoding, output_dir = "../paper/2_resubmission")
+    rmarkdown::render(inputFile, encoding = encoding, output_dir = "../paper/2_final_submission")
   })
 ---
 
 ```{r, echo=FALSE, warning=FALSE, results='hide', message=FALSE}
 library(rmarkdown)
 library(tidyverse)
-library(car)
-library(lmtest)
-library(plm)
-library(stargazer)
-library(knitr)
+library(plotly)
+library(rnaturalearth)
+library(rnaturalearthdata)
+library(gridExtra)
+library(cowplot)
+library(rprojroot)
 
-un <- read_csv("C:/Users/nw19521/OneDrive - University of Bristol/projects/Ioannides/ict.un.us.uk/data/data_inter/data_for_un_regressions.csv")
-us <- read_csv("C:/Users/nw19521/OneDrive - University of Bristol/projects/Ioannides/ict.un.us.uk/data/data_inter/data_for_usa_regressions.csv")
-uk <- read_csv("C:/Users/nw19521/OneDrive - University of Bristol/projects/Ioannides/ict.un.us.uk/data/data_inter/data_for_uk_regressions.csv")
+path <- find_rstudio_root_file()
 ```
 
-# First stage regressions for the 2SLS estimations
+# Pareto exponents
 
-## Global model
+The below maps plot the Pareto exponents for all the countries included in our data 
+set for the years 2000, 2005, 2010 and 2010. The quantiles of the yearly exponent 
+distribution are used for the maps with the first quantile always representing 
+the countries with the of the smallest Pareto exponent. 
 
-```{r, echo=FALSE, warning=FALSE, results='asis', message=FALSE}
+```{r, echo=FALSE, warning=FALSE, fig.width = 8}
 
-net.2sls.s1 <- lm(net100hab ~  fem.lab + log(pop.dens)  + gov.exp + trade + non.agri + gdp.growth + log(gdppc) +  log(pop) 
-                      + as.factor(year) + as.factor(country), 
-               data = un, weights = 1/(se^2))
+# load data
+path.data <- paste0(path, "/data/data_inter/UN.RData")
+load(path.data)
 
-bb.2sls.s1 <- lm(bb100hab ~ fem.lab + log(pop.dens)  + gov.exp + trade + non.agri + gdp.growth + log(gdppc) +  log(pop) 
-                      + as.factor(year) + as.factor(country), 
-               data = un, weights = 1/(se^2))
+# a zipf table for the appendix, which includes the Zipf coef. per year and country
+zipf.table <- net.model$model %>%
+  dplyr::select(`as.factor(country)`, `as.factor(year)`, b) %>%
+  spread(`as.factor(year)`, b) %>%
+  rename(`Countries` = `as.factor(country)`)
 
-fixed.2sls.s1 <- lm(fixed100hab ~ fem.lab + log(pop.dens) + gov.exp + trade + non.agri + gdp.growth + log(gdppc) +  log(pop) 
-                      + as.factor(year) + as.factor(country), 
-               data = un, weights = 1/(se^2))
+# a world `sf` to join with Zipf
+world <- ne_countries(scale = "medium", returnclass = "sf")
+world <- merge(world, zipf.table, by.x = 'iso_a3', by.y = 'Countries', all = T)
 
-mobile.2sls.s1 <- lm(mobile100hab ~ fem.lab + log(pop.dens)  + gov.exp + trade + non.agri + gdp.growth + log(gdppc) +  log(pop) 
-                      + as.factor(year) + as.factor(country), 
-               data = un, weights = 1/(se^2))
+# yearly maps
+map2000 <- world %>%
+  mutate(eq.n2000 = cut_number(`2000`, 
+                               n = 4,
+                               labels = c("1st quantile", "2nd quantile",
+                                          "3rd quantile", "4th quantile"))) %>%
+  ggplot() +
+  geom_sf(aes(fill = eq.n2000)) + 
+  ggtitle("2000") +
+  theme_minimal() + 
+  theme(legend.position = "top",
+        legend.title = element_blank(),
+        plot.title = element_text(hjust = 0.5))
 
-net.2sls.s1.rse <- coeftest(net.2sls.s1, function(x) vcovHC(x, type="HC0"))
+legend <- get_legend(map2000)
+map2000 <- map2000 + theme(legend.position="none")
 
-bb.2sls.s1.rse <- coeftest(bb.2sls.s1, function(x) vcovHC(x, type="HC0"))
 
-fixed.2sls.s1.rse <- coeftest(fixed.2sls.s1, function(x) vcovHC(x, type="HC0"))
+map2005 <- world %>%
+  mutate(eq.n2005 = cut_number(`2005`, 
+                               n = 4,
+                               labels = c("1st quantile", "2nd quantile",
+                                          "3rd quantile", "4th quantile"))) %>%
+  ggplot() +
+  geom_sf(aes(fill = eq.n2005), show.legend = F) + 
+  ggtitle("2005") +
+  theme_minimal() + 
+  theme(legend.title = element_blank(),
+        plot.title = element_text(hjust = 0.5))
 
-mobile.2sls.s1.rse <- coeftest(mobile.2sls.s1, function(x) vcovHC(x, type="HC0"))
+map2010 <- world %>%
+  mutate(eq.n2010 = cut_number(`2010`, 
+                               n = 4,
+                               labels = c("1st quantile", "2nd quantile",
+                                          "3rd quantile", "4th quantile"))) %>%
+  ggplot() +
+  geom_sf(aes(fill = eq.n2010), show.legend = F) + 
+  ggtitle("2010") +
+  theme_minimal() +
+  theme(legend.title = element_blank(),
+        plot.title = element_text(hjust = 0.5))
 
-stargazer(net.2sls.s1, bb.2sls.s1, fixed.2sls.s1, mobile.2sls.s1, type = "latex",
-          se = list(net.2sls.s1.rse[,"Std. Error"], bb.2sls.s1.rse[,"Std. Error"],
-                    fixed.2sls.s1.rse[,"Std. Error"], mobile.2sls.s1.rse[,"Std. Error"]),
-          header = FALSE,
-          no.space=TRUE,
-          title = "First stage regressions for Table 5 \\label{2sls.global.s1}",
-          font.size = "footnotesize",
-          column.sep.width = "1pt",
-          # dep.var.labels=c("Internet users per 100 hab. (log)",
-          #                 "Broadband users per 100 hab. (log)",
-          #                 "Mobile phone users per 100 hab. (log)",
-          #                 "Fixed phone users per 100 hab. (log)"),
-          column.labels=c('Internet users',
-                           "Broadband users",
-                           "Mobile phone users",
-                           "Fixed phone users"),
-          dep.var.labels.include = FALSE,
-          #column.separate = c(1,1,1,1),
-          covariate.labels=c("Female labour force (\\%)",
-                             "Population density (log)",
-                             "Government expenditure (\\% GDP)",
-                             "Trade (\\% of GDP)",
-                             "Non agriculture value added (\\% GDP)",
-                             "GDP growth",
-                             "GDP per capita (log)",
-                             "Population (log)"),
-          single.row = FALSE, df = FALSE,
-          omit = c("country", "year"),
-          omit.stat = c("rsq", "f"),
-          add.lines = list(
-            # c(rownames(summ.net.2sls$diagnostics)[1], # use rownames as line name. in this case Weak insterumetns
-            #                  round(summ.net.2sls$diagnostics[1, "statistic"], 2),
-            #                  round(summ.bb.2sls$diagnostics[1, "statistic"], 2),
-            #                  round(summ.fixed.2sls$diagnostics[1, "statistic"], 2),
-            #                  round(summ.mobile.2sls$diagnostics[1, "statistic"], 2)),
-            #                c(rownames(summ.net.2sls$diagnostics)[2],
-            #                  round(summ.net.2sls$diagnostics[2, "statistic"], 2),
-            #                  round(summ.bb.2sls$diagnostics[2, "statistic"], 2),
-            #                  round(summ.fixed.2sls$diagnostics[2, "statistic"], 2),
-            #                  round(summ.mobile.2sls$diagnostics[2, "statistic"], 2)),
-            #                c("P-value",
-            #                  round(summ.net.2sls$diagnostics[2, "p-value"], 2),
-            #                  round(summ.bb.2sls$diagnostics[2, "p-value"], 2),
-            #                  round(summ.fixed.2sls$diagnostics[2, "p-value"], 2),
-            #                  round(summ.mobile.2sls$diagnostics[2, "p-value"], 2)),
-                           # c(rownames(summ.net.2sls$diagnostics)[3],
-                           #   round(summ.net.2sls$diagnostics[3, "statistic"], 2),
-                           #   round(summ.bb.2sls$diagnostics[3, "statistic"], 2),
-                           #   round(summ.fixed.2sls$diagnostics[3, "statistic"], 2),
-                           #   round(summ.mobile.2sls$diagnostics[3, "statistic"], 2)),
-                           # c("P-value",
-                           #   round(summ.net.2sls$diagnostics[3, "p-value"], 2),
-                           #   round(summ.bb.2sls$diagnostics[3, "p-value"], 2),
-                           #   round(summ.fixed.2sls$diagnostics[3, "p-value"], 2),
-                           #   round(summ.mobile.2sls$diagnostics[3, "p-value"], 2)),
-                           c("Country fixed effects", "Yes", "Yes", "Yes", "Yes"),
-                           c("Yearly fixed effects", "Yes", "Yes", "Yes", "Yes")),
-          notes = c("Robust Std. Errors in parenthesis"))
+map2015 <- world %>%
+  mutate(eq.n2015 = cut_number(`2015`, 
+                               n = 4,
+                               labels = c("1st quantile", "2nd quantile",
+                                          "3rd quantile", "4th quantile"))) %>%
+  ggplot() +
+  geom_sf(aes(fill = eq.n2015), show.legend = F) + 
+  ggtitle("2015") +
+  theme_minimal() +
+  theme(legend.title = element_blank(),
+        plot.title = element_text(hjust = 0.5))
+  
 
-net.test <- car::linearHypothesis(net.2sls.s1, c("fem.lab=0"))
-bb.test <- car::linearHypothesis(bb.2sls.s1, c("fem.lab=0"))
-mob.test <- car::linearHypothesis(fixed.2sls.s1, c("fem.lab=0"))
-fixed.test <- car::linearHypothesis(mobile.2sls.s1, c("fem.lab=0"))
-
-tests <- data.frame("F" = c(net.test$F[2], bb.test$F[2], mob.test$F[2], fixed.test$F[2]),
-                    "p" = c(net.test$`Pr(>F)`[2], bb.test$`Pr(>F)`[2], mob.test$`Pr(>F)`[2], fixed.test$`Pr(>F)`[2]),
-                    row.names = c("internet users", "broadband users", "mobile phone users", "fixed telephony users"))
-
-stargazer(tests, 
-          summary = F, 
-          type = "latex",
-          digits = 3,
-          title = "F tests for IV (female labour force (\\%)) from first stage regressions for Table 5 \\label{2sls.global.s1.f}",
-          header = FALSE
-)
+lay <- rbind(c(1,2),
+             c(3,4),
+             c(5,5))
+grid.arrange(map2000, map2005, map2010, map2015, legend,
+            nrow=3, 
+            heights=c(2.3, 2.3, 0.3),
+            layout_matrix = lay)
 ```
 
-\newpage
+The Pareto exponents are plotted below as an interactive line graph.
 
-## US model
+```{r, echo=FALSE, warning=FALSE, fig.width = 8}
 
-```{r, echo=FALSE, warning=FALSE, results='asis', message=FALSE}
+zipf.line <- zipf.table %>% 
+  pivot_longer(!Countries, names_to = "year", values_to = "zipf") %>% 
+  ggplot(aes(x=year, y=zipf, group = Countries, colour = Countries),
+         show.legend = F) + 
+  geom_line() + guides(colour=FALSE) + xlab("Year") +
+  ylab("Pareto exponent")  
 
-model_iv1.s1 <- lm(hh.net.share ~ bachelors2005 + 
-                     log(pop2013) + un13 + white2013share + 
-                     log(income2013) + I(pop2013/area_h) + service2013 + commuting.minutes2013, 
-                   data = us)
-
-model_iv2.s1 <- lm(hh.net.share ~ bachelors2005 + commuting.minutes2005 + 
-                     log(pop2013) + un13 + white2013share + 
-                     log(income2013) + I(pop2013/area_h) + service2013 + commuting.minutes2013, 
-                   data = us)
-
-rob.model_iv1.s1 <- coeftest(model_iv1.s1, function(x) vcovHC(x, type="HC0")) # rob = rse, naming inconsistency
-rob.model_iv2.s1 <- coeftest(model_iv1.s1, function(x) vcovHC(x, type="HC0"))
-
-stargazer(model_iv1.s1, model_iv2.s1, 
-          type = "latex",
-          title = "First stage regressions for Table 8 \\label{2sls.us.s1}",
-          header = FALSE,
-          se = list(rob.model_iv1.s1[,"Std. Error"], rob.model_iv2.s1[,"Std. Error"]), 
-          dep.var.labels=c("\\% of households w. internet 2013"),
-          covariate.labels=c("bachelors degree per hab. 2005",
-                             "commute in minutes 2005",
-                             "population 2013 (log)",
-                             "\\% of unemployment 2013",
-                             "\\% of white population 2013",
-                             "income 2013 (log)",
-                             "population density 2013",
-                             "\\% of employment in service 2011",
-                             "commute in minutes 2012"),
-          single.row = FALSE,
-          df = FALSE, 
-          omit.stat = c("rsq", "f"), 
-          notes = c("Robust Std. Error in parenthesis"))
-
-model_iv1.s1.test <- car::linearHypothesis(model_iv1.s1, c("bachelors2005=0"))
-model_iv2.s1.test <- car::linearHypothesis(model_iv2.s1, c("bachelors2005=0","commuting.minutes2005=0"))
-
-tests <- data.frame("F" = c(model_iv1.s1.test$F[2], model_iv2.s1.test$F[2]),
-                    "p" = c(model_iv1.s1.test$`Pr(>F)`[2], model_iv2.s1.test$`Pr(>F)`[2]),
-                    row.names = c("bachelors degree per hab., 2005", "the above + commute in minutes, 2005"))
-
-stargazer(tests, 
-          summary = F, 
-          type = "latex",
-          digits = 3,
-          title = "F tests for IVs from first stage regressions for Table 8 \\label{2sls.us.s1.f}",
-          header = FALSE
-)
-```
-
-\newpage
-
-## UK model
-
-```{r, echo=FALSE, warning=FALSE, results='asis', message=FALSE}
-
-model_iv1.s1 <- lm(log(download2011) ~ uni.freq +
-                     log(pop2011) + I(n.tests2011/pop2011) + unemployment.share + 
-                     british.pop.share +  pop.dens + work.home.share + services.share
-                     , data = uk, subset = n.tests2011>30)
-
-model_iv2.s1 <- lm(log(download2011) ~ uni.freq + n.tests2011 +
-                     log(pop2011) + I(n.tests2011/pop2011) + unemployment.share + 
-                     british.pop.share +  pop.dens + work.home.share + services.share
-                     , data = uk, subset = n.tests2011>30)
-
-rob.model_iv1.s1 <- coeftest(model_iv1.s1, function(x) vcovHC(x, type="HC0"))
-rob.model_iv2.s1 <- coeftest(model_iv2.s1, function(x) vcovHC(x, type="HC0"))
-
-stargazer(model_iv1.s1, model_iv2.s1,
-          type="latex",
-          summary = F,
-          header = FALSE,
-          no.space=TRUE,
-          title = "First stage regressions for Table 11 \\label{2sls.us.s1}",
-          font.size = "small",
-          se = list(rob.model_iv1.s1[,"Std. Error"], rob.model_iv2.s1[,"Std. Error"]),
-          dep.var.labels=c("download speed, 2011 (log)"),
-          covariate.labels=c("N. of universities",
-                             "N. of broadband tests, 2011",
-                             "population, 2011 (log)",  
-                             "broadband tests per capita, 2011",
-                             "\\% of unemployment, 2011",
-                             "\\% of British population, 2011",
-                             "population density, 2011",
-                             "\\% of people working from home, 2011",
-                             "employment in service, 2011 (\\%)"),
-          single.row = FALSE,
-          df = FALSE,
-          omit.stat = c("rsq", "f"), 
-          notes = c("Robust Std. Errors"))
-          
-          
-# N. of universities",
-# N. of universities, N. of broadband tests, 2011"),
-
-model_iv1.s1.test <- car::linearHypothesis(model_iv1.s1, c("uni.freq=0"))
-model_iv2.s1.test <- car::linearHypothesis(model_iv2.s1, c("uni.freq=0", "n.tests2011=0"))
-
-tests <- data.frame("F" = c(model_iv1.s1.test$F[2], model_iv2.s1.test$F[2]),
-                    "p" = c(model_iv1.s1.test$`Pr(>F)`[2], model_iv2.s1.test$`Pr(>F)`[2]),
-                    row.names = c("N. of universities", "the above + N. of broadband tests, 2011"))
-
-stargazer(tests, 
-          summary = F, 
-          type = "latex",
-          digits = 3,
-          title = "F tests for IVs from first stage regressions for Table 8 \\label{2sls.us.s1.f}",
-          header = FALSE
-)
-
+ggplotly(zipf.line,
+         show.legend=F)
+  
 ```

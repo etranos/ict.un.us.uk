@@ -1,10 +1,10 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (MiKTeX 2.9.7250 64-bit) (preloaded format=pdflatex 2020.8.26)  19 NOV 2020 11:24
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (MiKTeX 2.9.7250 64-bit) (preloaded format=pdflatex 2020.8.26)  1 FEB 2021 15:06
 entering extended mode
 **"C:/Users/nw19521/OneDrive - University of Bristol/projects/Ioannides/ict.un.
-us.uk/paper/2_resubmission/s1.tex"
+us.uk/paper/2_final_submission/s1.tex"
 
 ("C:/Users/nw19521/OneDrive - University of Bristol/projects/Ioannides/ict.un.u
-s.uk/paper/2_resubmission/s1.tex"
+s.uk/paper/2_final_submission/s1.tex"
 LaTeX2e <2020-02-02> patch level 5
 L3 programming layer <2020-08-07> (C:\Users\nw19521\AppData\Local\Programs\MiKT
 eX\tex/latex\base\article.cls
@@ -732,12 +732,12 @@ LaTeX Warning: There were multiply-defined labels.
  ) 
 Here is how much of TeX's memory you used:
  14333 strings out of 481181
- 212541 string characters out of 2903886
+ 212557 string characters out of 2903886
  541584 words of memory out of 3000000
  29625 multiletter control sequences out of 15000+200000
  573025 words of font info for 75 fonts, out of 3000000 for 9000
  1141 hyphenation exceptions out of 8191
- 50i,11n,42p,906b,333s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 50i,11n,42p,910b,333s stack positions out of 5000i,500n,10000p,200000b,50000s
 {C:/Users/nw19521/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/lm/lm-mathit.
 enc}{C:/Users/nw19521/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/lm/lm-rm.en
 c}{C:/Users/nw19521/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/lm/lm-mathsy.
