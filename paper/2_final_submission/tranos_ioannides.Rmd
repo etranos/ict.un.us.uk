@@ -73,12 +73,12 @@ On the other hand, the very same technologies can further enhance what Storper a
 
 Urban economics suggests that a key source of agglomeration externalities is proximity, which  facilitates interaction and knowledge spillovers [@rosenthal_evidence_2004].
 Hence, face-to-face interactions and the implied knowledge spillovers within cities flourish because of lower transportation and interaction costs [@storper_buzz_2004].
-However, ICT have the capacity to directly affect this process by further reducing transportation cost^[Or, more broader, spatial transmission costs to follow McCann’s terminology [@mccann_globalization_2008]] [@mccann_globalization_2008].
+However, ICT have the capacity to directly affect this process by further reducing transportation cost [@mccann_globalization_2008].
 In essence, the internet and digital communications promote further learning and matching, which are at the heart of the micro-foundations of agglomeration economies identified by Duranton and Puga [@duranton_micro-foundations_2004].
 Web-based applications such as Massive Open Online Courses decrease the need for co-location of actors in order to participate in formal learning activities.
-Furthermore, online social media such as LinkedIn^[LinkedIn has been identified as "the largest professional matchmaker site in the world" [@van_dijck_you_2013], p. 207.
-See also [@gee2019more].]
-can enhance the probability of matching and indeed the quality of matches even within cities. Therefore, it is natural to ask whether the widespread adoption of ICT could offset the benefits of  immediate physical proximity and result in more dispersed spatial structures, or further reinforce agglomeration  externalities and lead to more concentrated spatial structures.
+Furthermore, online social media such as LinkedIn can enhance the probability of matching and indeed the quality of matches even within cities.
+This is why LinkedIn has been identified as "the largest professional matchmaker site in the world" [[@van_dijck_you_2013] p. 207; [@gee2019more]].
+Therefore, it is natural to ask whether the widespread adoption of ICT could offset the benefits of  immediate physical proximity and result in more dispersed spatial structures, or further reinforce agglomeration  externalities and lead to more concentrated spatial structures.
 
 This paper contributes to the above discussion by presenting empirical research on whether the internet and digital communications have affected spatial structure, as seen via the size distribution of cities.
 Contrary to most of the previous empirical studies, which are reviewed in the next section, this paper returns first to an empirical setting similar to that of Ioannides et al. [@ioannides2008effect] in order to re-examine their results by employing updated data on internet use, associated with the enhanced  technological maturity of ICT, and using a number of different data sets.
@@ -112,7 +112,6 @@ Indeed, to a certain extent, this argument is technology dependent.
 E.g., current teleconferencing capabilities are much more advanced than the ones available in the late 1990s.
 Hence, it behooves us to return empirically to the impact on agglomeration externalities from improved telecommunication technologies.
 
-<!-- <!-- \color{blue} --> -->
 Kolko [@kolko_death_2000] uses internet diffusion data and identifies a clear complementary link between internet usage and city size.
 Interestingly, he identifies higher internet domain densities in remote cities which indicates a substitution effect of the internet for longer-distance non-electronic communications. His results are consistent for different measures of internet diffusion (internet domain density and internet take-up).
 Sinai and Waldfogel [@todd_sinai_geography_2004] approach the same question from the consumers’ point of view and find support for complementarity between internet and cities.
@@ -129,10 +128,8 @@ Ioannides et al. [@ioannides2008effect] use country-level data on city size dist
 Using a panel dataset of spatial dispersion measures, they find robust evidence that an increase in the number of telephone lines per capita encourages the spatial dispersion of population in that they lead to a more concentrated distribution of city sizes.
 In addition, by the end of their study period the internet has come into use, but their results with internet usage is more speculative but do show that it goes in the same direction.
 
-<!-- <!-- \color{blue} --> -->
 Focusing on rural areas, Partridge et al. [@mark_d_partridge_employment_2008] find no evidence that rural distance penalties in the US have substantially changed since $1970s$ indicating that technological changes including the internet and digital communications have not affected spatial structure. Also interesting are the findings of a more recent study by Kim and Orazem [@kim_broadband_2016] on the economic effects of broadband internet in rural areas. They identify a positive effect on new firm location decisions, with the effect being higher in rural areas with larger population and in rural areas adjacent to a metropolitan area. These results suggest a complementary relation between the internet and agglomeration economies.
 
-<!-- <!-- \color{blue} --> -->
 Moving beyond modelling the direct relationship between ICT and spatial structure,
 Bekkerman and Gilpin [@bekkerman_high-speed_2013] focused on the role of locally
 based information resources using a dataset about the US libraries during the
@@ -143,7 +140,6 @@ are higher in larger metropolitan areas. Anenberg and Kung
 the internet and consumption variety in cities by focusing on food truck industry
 in the US.
 
-\color{black}
 Thus, clearly, previous research suggests that the declaration of the “death of distance” has  proven to be premature [@rietveld_transport_2004].
 However, the exact impact of digital communications on spatial structure is still an open question.
 As Leamer and Storper [@edward_e_leamer_economic_2001] indicate, the internet can affect both centripetal and centrifugal forces.
@@ -152,7 +148,7 @@ Moreover, most of the above studies examined the complementarity/substitutabilit
 For instance, internet penetration in the US in $2000$, which was the focus for quite a few of the above studies including Ioannides et al. [@ioannides2008effect], was just above $50$ percent, while in $2016$ it reached almost $90$ percent [@pew_internet_pew_2016].
 At a global scale internet penetration increased from $7$ to $46$ percent during the same period [@internet_live_stats_internet_2017].
 In addition, although email and instant messaging technologies were widespread in the developed world in early $2000s$, network externalities due to mobile internet and online social media were nowhere close to what we are familiar with today.
-For instance, Facebook users increased from $1$ million in $2004$ to more than $1.5$ billion in $2015$^[[http://newsroom.fb.com/company-info/](http://newsroom.fb.com/company-info/)].
+For instance, Facebook users increased from $1$ million in $2004$ to more than $1.5$ billion in $2015$ [@fb].
 Hence, it might have been premature for the spatial economic effects of ICT adoption to have been materialized by the time that most of the above studies were conducted.
 
 Most recently, Tranos and Ioannides [@tranos2020ict] return to the setting of Ioannides et al. [@ioannides2008effect], update the data employed and obtain results that confirm their original findings.
@@ -161,7 +157,6 @@ Similar causal effects are established for mobile telephony, which are novel in 
 The robustness of their results is confirmed for such alternative measures of dispersion as the Gini coefficient, the Herfindahl index, and the coefficient of variation.
 This is notable because several years of additional data were used that pertain to an era of rapid expansion of the internet and web-based technologies, more generally.
 
-<!-- \color{blue} -->
 The present paper does not address the issue that adoption of ICT may have
 different effects on urban dispersion on a national scale, that is how far are
 major urban areas, that is, cities, from one another, versus dispersion within major
@@ -171,7 +166,6 @@ given advancements in information technology.
 We think that data from the Covid-19 pandemic would likely throw light at this
 issue in the future, as it is clear that not all economic activities might
 continue in an unencumbered manner; see Dingel and Neiman [@dingel2020many].
-\color{black}
 
 # Materials and Methods {#sec3}
 
@@ -187,25 +181,17 @@ Because of limitations related with multi-country urban population data (see dis
 
 The multi-country identification strategy is a two-step approach [@ioannides2008effect].
 The first step of our methodology is to estimate the
-<!-- \color{blue} -->
 Pareto exponent
-\color{black}
 for a broad sample of countries over time.
-<!-- \color{blue} -->
-The Pareto exponent
-\color{black}
-is one of the most widely used measures of spatial dispersion with numerous applications in urban economics and economic geography ([see for example @black_urban_2003; @frenken_theoretical_2007; @giesen_zipfs_2011; @rauch_cities_2013; @ioannides_zipfs_2003; @ioannides_walled_2017; @nitsch_zipf_2005).
-This an appropriate measure of dispersion because of the extreme heterogeneity of the city size distribution and the very good fits normally obtained with such estimations^[
-<!-- \color{blue} -->
-We also replicate our analysis using other measures of dispersion in Appendix S1. Our results remain consistent.].
-\color{black}
+The Pareto exponent is one of the most widely used measures of spatial dispersion with numerous applications in urban economics and economic geography ([see for example @black_urban_2003; @frenken_theoretical_2007; @giesen_zipfs_2011; @rauch_cities_2013; @ioannides_zipfs_2003; @ioannides_walled_2017; @nitsch_zipf_2005).
+This an appropriate measure of dispersion because of the extreme heterogeneity of the city size distribution and the very good fits normally obtained with such estimations.
+We also replicate our analysis using other measures of dispersion in Appendix S1. Our results remain consistent.
 Skipping details pertaining of the suitability of the approach, which may be found in Ioannides et al. [@ioannides2008effect] and Tranos and Ioannides [@tranos2020ict], we proceed with the estimation of the logarithmic form of:
 
 \begin{align}
 ln(rank_{i}) = ln(S_0) + \zeta ln(Size_i) + e_{i}. \label{eq1}
 \end{align}
 
-<!-- \color{blue} -->
 This leads to an estimate of $\zeta$, known as the Zipf coefficient,
 but more appropriately the Pareto exponent, a terminology we will adhere to for
 the remained of the text, even  when $\zeta$ is estimated to be near $1$.
@@ -218,7 +204,6 @@ case we refer to $\zeta$ as the Pareto, or power law, exponent.
 Given that our aim here is to estimate $\zeta$ for a number of countries over
 time as a measure of dispersion, equation \ref{eq1} describes the rank of city
 $i$ in country $c$ in year $t$:
-\color{black}
 
 \begin{align}
 ln(rank_{ict}) = ln(S_{0ct}) + \zeta_{ct} ln(Size_{ict}) + e_{ict}. \label{eq2}
@@ -229,8 +214,9 @@ Gabaix and Ioannides [@gabaix_evolution_2004] discuss the downward bias of estim
 Gabaix and Ibragimov [@gabaix_rank_2011] propose a practical remedy to correct this bias, which we do adopt in this paper:
 instead of using the $log$ of $rank$ of a city $i$ in a country $c$ in year $t$, they propose to use the $log(rank-0.5)$, which has indeed been widely adopted.
 Researchers working in this area must contend with definitional differences as well as differences in availability of different kinds of data sources.
-Definitions of cities differ across countries, for political, administrative and legal reasons^[See [@ioannides2013neighborhoods], Ch. 8, for issues and pitfalls associated with different definitions.].
-In contrast to the data drawn from Thomas Brinkhoff’s City Population project [@thomas_brinkhoff_city_2014]^[[http://www.citypopulation.de](http://www.citypopulation.de)], which were  used by Soo [@soo_zipfs_2005], Ioannides et al. [@ioannides2008effect] and Tranos and Ioannides [@tranos2020ict], the multi-country analysis in the present paper is based on the annual population data for urban agglomerations with $300,000$ inhabitants or more from the Department of Economic and Social Affairs of the United Nations [@united_nations_world_2014].
+Definitions of cities differ across countries, for political, administrative and legal reasons [see [@ioannides2013neighborhoods], Ch. 8, for issues and pitfalls associated with different definitions].
+In contrast to the data drawn from Thomas Brinkhoff’s City Population project [@citypop], 
+which were  used by Soo [@soo_zipfs_2005], Ioannides et al. [@ioannides2008effect] and Tranos and Ioannides [@tranos2020ict], the multi-country analysis in the present paper is based on the annual population data for urban agglomerations with $300,000$ inhabitants or more from the Department of Economic and Social Affairs of the United Nations [@united_nations_world_2014].
 Despite some criticism about the consistency of the urban agglomeration definitions across different countries [@cohen_urban_2004], this is the only available source for yearly, multi-country population data for urban agglomerations [@montgomery_urban_2008; @chen_absolute_2007; @decker_global_2007].
 The results based on these data are reported and discussed in [Section 4](#sec4).
 
@@ -264,26 +250,19 @@ kable(zipf.table, format = "latex",
 
 The second step of our methodology involves estimating the following empirical model [@ioannides2008effect]:
 
-<!-- \color{blue} -->
-
 \begin{align}
 \zeta_{ct} = \theta_{c} + \delta_{t} + X_{ct} + e_{ct}. \label{eq3}
 \end{align}
 
-\color{black}
 \noindent The model enable us to estimate the effects of a vector $X$ of explanatory variables which are included to account for the spatial structure of country $c$ in year $t$.
 The main variables of interest here are internet and digital communications variables that include: internet users per $100$ inhabitants, broadband users per $100$ inhabitants, mobile phone users per $100$ inhabitants, and fixed phone users per $100$ inhabitants.
 To address a potential omitted variable bias equation \ref{eq3} includes
-<!-- \color{blue} -->
 country ($\theta_c$) and year ($\delta_t$) fixed effects;
-\color{black}
 $e_{ct}$ is the error term.
 In addition, vector $X$ includes several control variables, whose descriptive statistics together with those for the other variables used to estimate \ref{eq3} are reported in Table \ref{desc.global}.
 
 Referring to the control variables, total country population is an important measure of size, GDP per capita, and GDP growth are intimately related to urbanization and so are population density, and non-agricultural value-added as a share of GDP.
 Trade, that is conventionally measured as exports plus imports as a share of GDP, is an important time varying measure of trade openness. Government expenditure as a share of GDP may be a proxy of public investment in some countries and government waste in others.
-
-<!-- \color{blue} -->
 
 As Table \ref{cor} indicates, although there some rather strong correlations among these variables, mobile phone penetration appears to have a distinct character from its fixed phone counterpart: their correlation coefficient is only $0.445$.
 This probably highlights the different composition of the population or infrastructure development patterns in the developing world, where mobile telephony helped overcome the lack of fixed line infrastructure and mobile phone networks are also used as the main way to use the internet [@donner_research_2008; @hamilton_are_2003].
@@ -317,10 +296,6 @@ stargazer(as.data.frame(data[,c(5:18)]),
           notes = c("\\textsuperscript{a}This is the inverse squared standard error of the estimated Pareto exponent, which is used for weighting",
                     "the observations for the estimation of equation 3. See Section 4"))
 ```
-
-
-\color{black}
-
 
 ```{r, echo=FALSE, warning=FALSE, results='asis'}
 # table 3
@@ -367,7 +342,9 @@ Therefore, we propose a one-step approach involving estimation of the following 
 Diff\:in\:ranks_{i} = a + \beta ICT_{i} + B C_{i} + e_{i}.\label{eq4}
 \end{align}
 
-In order to capture the micro-dynamics of the urban systems in the two case studies, we follow Batty [@batty_rank_2006] and Havlin [@havlin_distance_1995] and focus on the difference in ranks for individual cities during the study period ^[Changes in ranking of individuals has also been used elsewhere in economics because of its robustness properties. C.f. Chetty and Hendren [@chetty2018impacts].].
+In order to capture the micro-dynamics of the urban systems in the two case studies, we follow Batty [@batty_rank_2006] and Havlin [@havlin_distance_1995] and focus on the difference in ranks for individual cities during the study period.
+Changes in ranking of individuals have also been used elsewhere in economics because 
+of its robustness properties. C.f. Chetty and Hendren [@chetty2018impacts].
 Contrary to their approach, we are interested in the real difference in rankings rather than in absolute differences, in order to capture whether or a city improves its ranking within the urban system during the study period.
 We then test whether our internet-related variable has an effect on the change in ranking.
 Hence, we define the left-hand side (LHS) variable of equation \ref{eq4} as follows:
@@ -384,23 +361,14 @@ What we highlight here is that the estimation of equation \ref{eq4}, just like e
 # Digital technologies and spatial structure: a global view {#sec4}
 
 This section presents the estimation results of \ref{eq3}.
-The LHS variable is $\zeta$, the
-<!-- \color{blue} -->
-Pareto exponent,
-\color{black}
+The LHS variable is $\zeta$, the Pareto exponent,
 as estimated according to the Gabaix and Ibragimov [@gabaix_rank_2011] correction.
 The main explanatory variables of interest are provided at the top of Table \ref{ols.global}; namely internet, broadband, mobile and fixed telephony per $100$ habitants, expressed in natural logarithms.
 The main variables of interest are introduced successively on their own in the regressions reported in Table \ref{ols.global}.
 All regressions include country fixed effects to control for unobserved heterogeneity and a time trend.
 In addition, the observations are weighted with the inverse squared standard error of the estimated
-<!-- \color{blue} -->
-Pareto exponent
-\color{black}
-(see Table \ref{desc.global}) to address potential noise that is carried over from the first part of our identification strategy.
-In regards to the interpretation of the estimated coefficients, given that the
-<!-- \color{blue} -->
-Pareto exponent
-\color{black}
+Pareto exponent (see Table \ref{desc.global}) to address potential noise that is carried over from the first part of our identification strategy.
+In regards to the interpretation of the estimated coefficients, given that the Pareto exponent
 has entered the regression not as an absolute value, but instead as a real number a positive coefficient for a RHS variable indicates an impact towards the decrease of the spatial dispersion of population. In other words, a positive coefficient indicates an effect towards less uniform city sizes that is more dispersion of city sizes.
 The latter is indicative of enhancement of agglomeration economies because of the expansion of digital technologies.
 
@@ -445,9 +413,7 @@ Starting with the former, we note that an agglomerative effect is only detected 
 For the telephony variables the estimation of \ref{eq3} did not yield statistically significant coefficients.
 Before discussing further these results and the effects of the other control variables, we need to highlight that the main challenge of estimating equation \ref{eq3} is the potential endogenous nature of the share of internet users which might prevent us from being able to infer a truly causal effect.
 Endogeneity might be an issue here as spatial structure, which is proxied by the
-<!-- \color{blue} -->
 Pareto exponent,
-\color{black}
 might be affected by another source, which also affects internet penetration.
 For instance, economic development might affect the concentration of population in large cities and at the same time enable more people to go online.
 If we do not address this issue, the coefficient for the main variable of interest will capture potential effects that internet penetration has on spatial structure, but also potential reverse causality effects that spatial structure might generate on internet penetration.
@@ -533,9 +499,7 @@ The main challenge for such an exercise is to find a valid IV.
 In our case, the challenge is even bigger as we need to find a variable which is not only fit for purpose, but it also contain as few missing values as possible in order to retain the same number of observations as the OLS models.
 This is particularly difficult for a diverse sample of countries as the one we are dealing with here.
 We propose here the percentage of female participation in the labor force, which is directly related to digital infrastructure, but not to spatial structure (see Table \ref{desc.global} for the descriptive statistics).
-<!-- \color{blue} -->
 The literature provides empirical and theoretical evidence that ICT are correlated with female participation in labour markets mostly because they enable teleworking [@dettling2017; @arntz2019working; @watson2018digitalisation; @Lechman2020; @Valberg2020]
-\color{black}
 At the same time, female labor participation is not related with spatial structure especially given the diverse sample of countries.
 <!-- Firstly, the correlation coefficient between the IV and the Zipf coefficient is very low ($-0.14$). -->
 Although one might think that increased female labor participation may lead to relocation of households to large cities and therefore affect the spatial structure of cities, such a process varies a lot within our dataset.
@@ -547,12 +511,10 @@ Hence, we are confident to interpret the effects of internet, broadband internet
 The estimations presented in Table \ref{2sls.global} indicate that increases in internet and broadband internet usage have resulted to a decrease of the spatial dispersion of population for the time period and for the panel of countries included in our data.
 In other words, increases in internet and digital communications resulted to national urban systems which are less uniform in terms of city sizes and are characterized by higher population concentrations in larger cities.
 The exact opposite appears to happen for fixed telephony, which our results indicate that has led to an increase of spatial dispersion of population.
-<!-- \color{blue} -->
 We expect that the IV estimates capture the local average treatment effect
 [@angrist1995identification] of these labour markets, which are characterised by
 more active engagement with the internet, and, therefore, experience a larger effect
 on the Pareto exponents.
-\color{black}
 Importantly, our identification strategy enables us to address potential reverse causality issues and treat the results of Table \ref{2sls.global} as causal. Hence, the main finding of our multi-country, global analysis based on data for urban agglomerations of at least 300,000 inhabitants is that internet and broadband internet usage appear to act in favor of agglomeration economies and result to urban systems with more dominant cities on the top of the urban hierarchy.
 On the contrary, fixed telephony usage acted in favour of centrifugal forces.
 Our identification strategy does not enable us to make similar interpretations for mobile telephony usage.
@@ -564,15 +526,12 @@ Namely, GDP per capita has a negative effect which indicates that wealthier coun
 In total, the results indicate that our measures of internet and telephony penetration have further enhanced agglomeration forces, at least for large urban agglomerations, while the opposite happens for fixed telephony.
 These results are robust against endogeneity issues, but are limited to urban agglomeration included in our data.
 Indeed, for the estimation of the
-<!-- \color{blue} -->
 Pareto exponent
-\color{black}
 we only included urban agglomeration of $300,000$ inhabitants or more due to data availability.
 Hence, the above estimations cannot verify whether such an effect is also valid for smaller cities.
 Interestingly, the above results regarding the role of fixed telephony are in agreement with previous results from [@ioannides2008effect] [@tranos2020ict] which used a smaller panel of countries but without constraints regarding the city size.
 However, our results do not support the findings of [@tranos2020ict] regarding internet usage.
 
-<!-- \color{blue} -->
 It is indeed puzzling that the results on Table \ref{2sls.global} that the
 effects on urban concentration for internet users and broadband users, on the
 one hand, and mobile and fixed telephony users are in opposite directions.
@@ -586,7 +545,6 @@ to be near one another.
 ICT, as viewed through such granular studies of individuals' communications
 do not make up for physical distance; individuals nearer one another
 communicate more.  
-\color{black}
 
 In order to overcome the city size limitation, the next section presents two case studies, for which we have obtained much more granular data and therefore we are in a position to test the effect of the internet on the tail of the urban population distribution for these countries.
 
@@ -634,15 +592,18 @@ stargazer(as.data.frame(data.for.decr),
 ```
 
 The LHS variable we use here is the outcome of equation \ref{eq5}.
-<!-- \color{blue} -->
 We use this variable to estimate \ref{eq4} with OLS.
 Additionally, we employ a normalized form of the dependent variable, so as that
-variable is bounded between $0$ and $1$ and with a mean of  $0.5$^[$$Normalized\:difference\:in\:ranks_{i} = \frac{difference\:in\:ranks_{i} + N_{cities}}{2xN_{cities}}.$$].
+variable is bounded between $0$ and $1$ and with a mean of  $0.5$:
+
+\begin{align}
+Normalized\:difference\:in\:ranks_{i} = \frac{difference\:in\:ranks_{i} + N_{cities}}{2xN_{cities}},\label{eq6}
+\end{align}       
+
 This transformation enables us to estimate \ref{eq4}
 with a quasibinomial GLM estimator given that the original form of our LHS
 variable does not vary continuously, but is instead defined as a difference between
 two count variables, which may also assume negative values.
-<!-- \color{blue} -->
 The results of the different estimations remain qualitatively the same regardless of the form of the LHS variable we use.
 Table \ref{ols.usa} reports the results of the estimation of equation \ref{eq4} using OLS.
 The sign and significance of the main variable of interest -- percentage of population with computer and broadband connection -- verifies our global level results.
@@ -696,11 +657,9 @@ stargazer(base, int_density, int_pop, base_glm, type="latex",
 Although not directly comparable, the above estimations are in accordance with our global model. Moreover, the potential presence of endogeneity might be a problem here as well.
 Therefore, Table \ref{2sls.usa} reports 2SLS estimations.
 In addition to the strategy employed for the cross-country analysis -- that is the inclusion of one instrument for which we have strong reasons to believe is uncorrelated with the error term -- data availability allows us to employ a second IV in order to estimate the Sargan over-identification restrictions test (Column 2).
-The main instrument we propose here is Bachelor’s degrees per inhabitant in $2005$^[
-<!-- \color{blue} -->
-Due to differences in scale, time and the endogenous variables, different IVs
-have been unutilized for the different sections of the paper.
-\color{black}].
+The main instrument we propose here is Bachelor’s degrees per inhabitant in $2005$.
+We need to highlight here that due to differences in scale, time and the endogenous variables, 
+different IVs have been utilized for the different sections of the paper. 
 Even if the quality of human capital affect the population growth of a city $10$ years later, our LHS variable adopts a systemic understanding of the US urban system as it measures the relative position of a city within the overall urban system instead of its population growth.
 In other words, a city might experience population growth between two periods, but if other cities have also experienced population growth, this might not affect its relative position within the urban system.
 Hence, we do not expect that this IV affects the LHS variable.
@@ -761,10 +720,8 @@ stargazer(model_iv1, model_iv2, type = "latex",
 
 In total, the estimates of Table \ref{2sls.usa} enable us to identify a causal effect of the share of households with internet connection on the position of a city in the urban system.
 Specifically, an increase in internet penetration led to an improvement of the position of a city in the US urban hierarchy for the cities and the time period included in our analysis.
-<!-- \color{blue} -->
 Everything else being equal, if a city had experienced an increase of 10 per cent
 of internet penetration, this increase would have improved its relative position by $9$ places.
-\color{black}
 As in the global model reported in [Section 4](#sec4), internet penetration appears to work in favor of agglomeration externalities.
 In regards to the control variables, we can identify a negative effect of income, which is consistent with the effect of GDP per capita in the global model presented in Table \ref{2sls.global}.
 During the study period, unemployment rates and the share of white population negatively affected the ranking of micropolitan and metropolitan areas in the US as reflected in the relevant regressions.
@@ -896,14 +853,11 @@ stargazer(base, int_density, int_pop, base_glm,
 
 In regards to IV strategy, we use here the *number of universities* as the main instrument.
 Universities in England and Wales have been established long time ago and therefore we do not expect them to affect the change in the relative position of built-up areas in $2011$.
-<!-- \color{blue} -->
 The presence of universities and large student populations tend to be correlated
 with the quality of internet infrastructure provision [@GRUBESIC201950].
-\color{black}
 <!-- The correlation coefficient with the LHS variables is smaller than $0.05$. -->
 The addition of the second instrument (absolute number of broadband tests in 2011) in column $2$ results to a Sargan test, the null hypothesis of which cannot be rejected.
 Moreover, the estimations reported in Table 11 do not suffer from weak instruments as the relevant test is above the rule of thumb value of $10$.
-<!-- \color{blue} -->
 The coefficients derived from OLS (Table \ref{ols.uk}) and 2SLS (Table \ref{2sls.uk}) are always positive and significant, something which advocates in favour of the effect of broadband speed in enhancing agglomeration forces.
 Interestingly, the magnitude of the 2SLS coefficient (column 1 in Table \ref{2sls.uk})
 is almost 8 times higher than the OLS coefficient (column 1 in Table \ref{ols.uk}).
@@ -923,7 +877,6 @@ who actively engage with ICT (e.g. work on ICT-related sectors) and, therefore, 
 A back of the envelope calculation indicates that, everything else being equal,
 $10$ per cent increase in download speed for a BUA,
 would have increased its position by $4$ places.
-\color{black}
 
 ```{r, echo=FALSE, warning=FALSE, results='asis'}
 
@@ -1001,10 +954,9 @@ On the contrary, our estimates regarding the effect of fixed telephony advocate 
 While our results are in agreement with Ioannides et al. [@ioannides2008effect] regarding fixed telephony, they contradict Tranos and Ioannides [@tranos2020ict]
 The latter cannot of course be ignored.
 We believe strongly that the differences lie in the different definitions of urban areas.
-To this date, and in spite of numerous efforts by teams worldwide, there has not been a universally accepted definition, which could moreover be implemented consistently by governments worldwide^[
+To this date, and in spite of numerous efforts by teams worldwide, there has not been a universally accepted definition, which could moreover be implemented consistently by governments worldwide.
 The increasingly popular reliance on high-resolution, pioneered by Rozenfeld et al. [@rozenfeld2011area],  and satellite-based lights data, most recently used by Duben and Krause [@duben2019population], for measuring city sizes, are very exciting developments, but they have not yet been accompanied by complementary information on ICT adoption at a comparably granular level.
 A promising new development is the EU’s Global Human Settlements Initiative and the associated spatial urban data sets; see Pesaresi et al. [@pesaresi2019ghs].
-].
 Barring the availability of such data, scholars must be careful in drawing conclusions.
 Arguably, the measurement of the impact of ICT at the level of agglomerations, on one hand, and on changes in rankings, on the other, reported by this paper constitute a contribution to the literature.
 
