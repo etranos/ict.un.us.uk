@@ -729,7 +729,7 @@ During the study period, unemployment rates and the share of white population ne
 ## Internet and the UK Spatial Structure: Evidence from the Built-up Areas in England and Wales, 2011-2018 {#sec5.2}
 
 The next step in our analysis is to estimate equation \ref{eq4} for cities in England and Wales for which we were able to access internet speed micro-data.
-More specifically, we obtained individual speed internet tests from [broadbandspeedchecker.co.uk](broadbandspeedchecker.co.uk).
+More specifically, we obtained individual speed internet tests from [broadbandspeedchecker.co.uk](https://www.broadbandspeedchecker.co.uk/).
 This website enables individuals to directly measure their upload and download internet speed.
 The results of the tests as well as the geo-location of the users are recorded by the website operator and were provided to us in a fully anonymized manner. More discussion about the nature and the validity of this data can be found in the work of Riddlesden and Singleton [@riddlesden_broadband_2014].
 The point nature of these individual level data enables us to aggregate them up to any urban level that we are interested in.
@@ -966,5 +966,14 @@ In addition, the indication that such effects might be stronger for smaller and 
 Of course, improvements in internet speed is not a trivial policy instrument as it involves numerous complexities.
 Apart from infrastructure installation costs and engineering challenges, governance issues regarding the ownership of such digital networks as well as the provision of state subsidies create obstacles for the inclusion of such strategies in the urban growth agenda.
 To further inform such policies, more research at granular scales is needed in order to shed lights on the micro-mechanisms behind such urban processes.
+
+# Acknowledgments {.unnumbered}
+
+We are grateful to many audience members at the 2016 Annual Winter Seminar of the German speaking section of the European
+Regional Science Association, the North American Regional Science Council meetings, and Fall 2018 Opportunity and Inclusive
+Growth Conference, Federal Reserve Bank of Minneapolis, MN. We are also grateful to Max Nathan for very helpful comments, and to
+Esteban Rossi-Hansberg and anonymous reviewers, whose suggestions have not been yet fully incorporated in this version. We are also thankful 
+to [broadbandspeedchecker.co.uk](https://www.broadbandspeedchecker.co.uk/) for providing the UK internet speed data.
+Naturally, all errors are ours.
 
 # References {#references .unnumbered}

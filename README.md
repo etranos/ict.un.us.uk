@@ -2,9 +2,9 @@
 
 [Emmanouil Tranos](https://etranos.info/)<sup>1</sup> and [Yannis M. Ioannides](https://sites.tufts.edu/yioannides/)<sup>2</sup>
 
-<sup>1</sup> University of Bristol and The Alan Turing Institute, [e.tranos@bristol.ac.uk](mailto:e.tranos@bristol.ac.uk), [https://twitter.com/emmanouiltranos](https://twitter.com/emmanouiltranos)
+<sup>1</sup> University of Bristol and The Alan Turing Institute, [e.tranos@bristol.ac.uk](mailto:e.tranos@bristol.ac.uk), [@emmanouiltranos](https://twitter.com/emmanouiltranos)
 
-<sup>2</sup> Tufts University, [Yannis.Ioannides@tufts.edu](mailto:Yannis.Ioannides@tufts.edu), [https://twitter.com/profymi](https://twitter.com/profymi)
+<sup>2</sup> Tufts University, [Yannis.Ioannides@tufts.edu](mailto:Yannis.Ioannides@tufts.edu), [@profymi](https://twitter.com/profymi)
 
 This is the depository for the 'Ubiquitous Digital Technologies and Spatial Structure; an update' paper that will appear in *PLOS One*.
 
