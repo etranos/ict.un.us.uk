@@ -1,9 +1,3 @@
----
-editor_options: 
-  markdown: 
-    wrap: 72
----
-
 # Ubiquitous Digital Technologies and Spatial Structure; an update
 
 [Emmanouil Tranos](https://etranos.info/)<sup>1</sup> and [Yannis M.
@@ -24,12 +18,20 @@ paper published by *PLOS One*.
 
 ## Cite
 
-```\@article{10.1371/journal.pone.0248982, doi =
-{10.1371/journal.pone.0248982} author = {Tranos, Emmanouil AND
-Ioannides, Yannis M.} journal = {PLOS ONE} publisher = {Public Library
-of Science} title = {Ubiquitous digital technologies and spatial
-structure; an update} year = {2021} month = {04} volume = {16} url =
-{<https://doi.org/10.1371/journal.pone.0248982>} pages = {1-25} }```
+```{}
+@article{10.1371/journal.pone.0248982,
+    doi = {10.1371/journal.pone.0248982}
+    author = {Tranos, Emmanouil AND Ioannides, Yannis M.}
+    journal = {PLOS ONE}
+    publisher = {Public Library of Science}
+    title = {Ubiquitous digital technologies and spatial structure; an update}
+    year = {2021}
+    month = {04}
+    volume = {16}
+    url = {https://doi.org/10.1371/journal.pone.0248982}
+    pages = {1-25}
+}
+```
 
 ## Abstract
 
